@@ -1,0 +1,63 @@
+
+# Python and virtual environments
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Environment and local configuration
+.env
+.env.*
+!.env.example
+
+# Local datasets and checkpoints
+data/
+data-local/
+datasets/
+checkpoints/
+models-cache/
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.npz
+*.npy
+*.onnx
+*.safetensors
+*.bin
+
+# Large or transient local outputs
+out/
+logs/
+*.log
+*.tmp
+
+# If upstream is cloned inside this repository
+/ModelXRay-upstream/
+
+# IDE and system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# CSV, TSV, manifests and figures remain versionable
+# LaTeX temporary files
+*.aux
+*.synctex.gz
+*.fdb_latexmk
+*.fls  
