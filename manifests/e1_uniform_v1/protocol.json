@@ -1,0 +1,18 @@
+{
+  "checkpoint_manifest_sha256": "e9e6ee09169d59556c4f5aa23bc7137f50e5ab3ce2458b3df18016658976714f",
+  "leakage_check": "model_id and checkpoint_sha256 unique; each row assigned to exactly one split",
+  "methodology_note": "Earlier pilot testing explored the same 1000-model zoo; thus this split is frozen prospectively but not a wholly untouched external test set.",
+  "n_models": 1000,
+  "n_parameters_per_model": 2864,
+  "partition_sizes": {
+    "test": 200,
+    "train": 600,
+    "val": 200
+  },
+  "partition_unit": "model_id (one final checkpoint per independent training directory)",
+  "protocol_id": "e1_uniform_real_v1",
+  "purpose": "FSL E1 pilot-to-confirmatory protocol; freeze model origins before final runs",
+  "seed": 20261018,
+  "splits_sha256": "3f4236bf2b3e7a91e11dd67037c5dc3262382fd8c77ce333b49f30d6e4b93a6f",
+  "weights_sha256": "5a03ff6349010405fd05c7c27aee746143259fdf0a000acb4c9e05cbc8dd60ad"
+}
