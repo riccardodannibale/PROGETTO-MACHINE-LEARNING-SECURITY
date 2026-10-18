@@ -68,3 +68,12 @@ echo "Python:"
 "$VENV/bin/python" --version
 echo ""
 echo "Model X-Ray environment: $VENV"
+
+
+echo "Installing GHRP..."
+
+env SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NEURIPS_2022_GENERATIVE_HYPER_REPRESENTATIONS=0.0.0 \
+  "$UV" pip install \
+  --python "$VENV/bin/python" \
+  --no-deps \
+  -e "$PROJECT_ROOT/external/ModelXRay/external_code/ghrp/"
