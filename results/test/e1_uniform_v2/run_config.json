@@ -1,0 +1,28 @@
+{
+  "important_note": "Earlier exploratory runs used the same zoo; not fully external holdout",
+  "imsize": 100,
+  "mode": "ub",
+  "n_repeats": 10,
+  "n_train_identities": 3,
+  "numpy_version": "1.26.4",
+  "payload_independent_per_row": true,
+  "payload_nbytes": 16384,
+  "payload_scheme": "sha256-keyed-uint8-pcg64-per-model-v1",
+  "project_commit": "f5bf86b237ca61f1d845732be41aa24203855921",
+  "protocol_id": "e1_uniform_real_v1",
+  "runner_revision": "v2_deterministic_synthetic_file_per_model",
+  "score_definition": "Euclidean margin nearest benign - nearest stego; higher=stego",
+  "seed": 42,
+  "source": "ModelXRay upstream Siamese + separate identity-paired protocol",
+  "splits_sha256": "3f4236bf2b3e7a91e11dd67037c5dc3262382fd8c77ce333b49f30d6e4b93a6f",
+  "stage": "test",
+  "threshold_selection": "Validation-only maximum Youden J, original zero margin also reported",
+  "upstream_commit": "a880e332f556fc71faf8d3753931005d5d019339",
+  "weights_sha256": "5a03ff6349010405fd05c7c27aee746143259fdf0a000acb4c9e05cbc8dd60ad",
+  "x_range": [
+    1,
+    8,
+    16,
+    23
+  ]
+}
