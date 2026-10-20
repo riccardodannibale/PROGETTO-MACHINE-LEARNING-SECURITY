@@ -101,3 +101,24 @@ Il comando legge i **CSV versionati** già prodotti e rigenera quattro PNG in `r
 - GitHub upstream: https://github.com/danigil/ModelXRay
 - Dataset zoo GHRP STL10: https://zenodo.org/records/6631784
 - Roadmap originale del progetto d'esame, file del gruppo: `Roadmap_Progetto_Tesi_Paper_IEEE_con_Letture(7).docx`.
+
+
+## Replica indipendente di Fabrizio su Mac M4 (20 ottobre 2026)
+
+Materiali consegnati in `results/replicas/e1_mac_m4/`:
+- `summary.csv` con 32 aggregazioni (16 test + 16 validation dei fit test);
+- `metrics_per_run.csv` con 320 record (160 test + 160 validation), 10 repliche × 4 X × 2 metodi × 2 soglie × 2 stage;
+- `e1_v2_test.log` per audit dell'esecuzione;
+- `replication_manifest.md` con provenienza e lacune.
+
+**Confronto test X23 centroid:** Ubuntu AUROC **0,901863**, accuracy Youden **0,82125**, FPR Youden **0,1550**; Mac AUROC **0,9043775**, accuracy Youden **0,82300**, FPR Youden **0,1605**. Per X1/8/16 AUROC ~0,5 su entrambe le piattaforme. La replica Mac non dimostra test OOD: la differenza è nella CPU/sistema operativo, non nel model zoo.
+
+Il commit dichiarato da Fabrizio è `59f556c`, differente dal `f5bf86b` usato per il test Ubuntu; occorre ispezionare il diff degli script prima di rivendicare **identità del codice**. Mancano negli allegati standalone validation Mac, `run_config.json` e manifest per-payload; Fabrizio li dichiara completati nel suo resoconto. **Non confondere** questa validation stand-alone con le 40 validation sui nuovi fit del test, queste ultime presenti nel CSV.
+
+Per rigenerare il confronto senza effettuare training:
+
+```bash
+python scripts/plot_e1_comparison.py
+```
+
+Questo comando legge `results/test/e1_uniform_v2/summary.csv` (Ubuntu) e `results/replicas/e1_mac_m4/summary.csv` (Mac). Per riprodurre il test Mac ex novo, usare il protocollo del repo e registrare un nuovo run separato, senza sovrascrivere il test originale.
