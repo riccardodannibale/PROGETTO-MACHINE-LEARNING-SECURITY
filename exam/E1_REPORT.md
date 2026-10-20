@@ -1,11 +1,12 @@
 # E1 — Rilevamento in-distribution di embedding LSB su pesi reali di CNN
 
-**Progetto:** Beyond the X-Ray — Machine Learning Security, lavoro condiviso Riccardo–Fabrizio.  
-**Data di chiusura sperimentale:** 19 ottobre 2026. **Stato:** E1 concluso; E2 ed E3 ancora da completare.  
-**Risultati finali versionati:** commit [`d35f8f2`](https://github.com/riccardodannibale/PROGETTO-MACHINE-LEARNING-SECURITY/commit/d35f8f2), branch `ricky`.  
+**Progetto:** Beyond the X-Ray — Machine Learning Security, lavoro condiviso Riccardo–Fabrizio.
+**Chiarimento:** «due architetture» qui indica le **piattaforme di calcolo** (Ubuntu/CPU x86_64 virtualizzata e macOS/ARM64 M4), **non due architetture differenti di reti CNN**. Il dataset e il protocollo E1 rimangono gli stessi.  
+**Chiusura su Ubuntu:** 19 ottobre 2026. **Replica cross-platform ricevuta:** 20 ottobre 2026. **Stato:** E1 completato e replicato su due piattaforme; E2 ed E3 ancora da eseguire.  
+**Risultati Ubuntu versionati:** commit [`d35f8f2`](https://github.com/riccardodannibale/PROGETTO-MACHINE-LEARNING-SECURITY/commit/d35f8f2), branch `ricky`. **Replica Fabrizio:** file `results/replicas/e1_mac_m4/`; HEAD Mac dichiarato `59f556c` (diff del codice da verificare).  
 **Metodologia:** protocollo *few-shot* adattato da Model X-Ray; non replica numerica esatta delle tabelle pubblicate dagli autori.
 
-> **Risultato sintetico.** Sul test interno con checkpoint sorgente distinti, il detector *centroid* raggiunge, a **X=23**, AUROC media **0,9019** su 10 ripetizioni e accuracy **82,13%** con soglia scelta esclusivamente sulla validation. Per X=1,8,16 l'AUROC è prossima a 0,5. Questo risultato non costituisce una dimostrazione di generalizzazione OOD né di attacco steganografico funzionalmente indisturbato.
+> **Risultato sintetico.** Sul test interno con checkpoint sorgente distinti, il detector *centroid* raggiunge, a **X=23**, AUROC media **0,901863 su Ubuntu x86_64** e **0,904378 su Mac M4 ARM64**, entrambe su 10 ripetizioni. Accuracy con soglia scelta esclusivamente sulla validation: **82,125% su Ubuntu** e **82,300% su Mac**. Per X=1,8,16 l'AUROC è prossima a 0,5. Questo risultato non costituisce una dimostrazione di generalizzazione OOD né di attacco steganografico funzionalmente indisturbato.
 
 ---
 
@@ -193,9 +194,69 @@ La calibrazione migliora leggermente accuracy e FPR medi a X23 sul test, **non**
 
 Le figure allegate sono state predisposte usando i **valori dei riepiloghi CSV condivisi nei log**; per la verifica finale vanno **rigenerate sui CSV realmente versionati** con `scripts/plot_e1_results.py` prima del commit. Non ricostruirle a mano cambiando cifre o aggregazioni. Lo script non esegue training.
 
-## 7. Discussione
+## 7. Replica di Fabrizio su Mac M4 — confronto delle piattaforme
 
-**Messaggio principale.** Nel setting E1 il metodo centroid discrimina bene campioni benign/stego quando si sovrascrivono **23 bit di mantissa** (AUROC media ~0,902), ma ha un comportamento vicino al caso per **X=1,8,16** (AUROC 0,500–0,508). Questo è un risultato sul **particolare zoo e protocollo few-shot** studiati, non una misura universale di efficacia contro stegomalware.
+### 7.1 Che cosa rappresenta il confronto e cosa NON rappresenta
+
+**Confronto originale → Ubuntu → Mac.** Il lavoro originale **Model X-Ray** è il riferimento metodologico e di codice; i suoi risultati pubblicati derivano da condizioni che non sono state qui accertate come identiche al nostro protocollo e **non sono collocati in una tabella quantitativa comune**. Il **pilot upstream originale** e la **validation esplorativa E1 v1** rappresentano invece fasi interne di sviluppo, non un terzo test finale indipendente. I soli risultati direttamente accostati nella tabella seguente sono le due esecuzioni E1 v2 con dati e split corrispondenti.
+
+**Riccardo:** Ubuntu 24.04 su VirtualBox, CPU x86_64, 6 vCPU, ~11 GiB RAM, 4 GiB swap. **Fabrizio:** macOS su Apple Silicon **M4 ARM64**, TensorFlow su CPU (Metal non attivato), Python 3.11.17, NumPy 1.26.4, TensorFlow 2.15.1, PyTorch 2.4.0; nessuna GPU TensorFlow visibile. Non sono due architetture **neuronali**: le 1.000 CNN sorgente hanno la stessa rappresentazione in entrambi i run.
+
+Integrità dichiarata e confrontabile:
+
+- `weights.npy` SHA-256: `5a03ff6349010405fd05c7c27aee746143259fdf0a000acb4c9e05cbc8dd60ad`.
+- `splits.csv` SHA-256: `3f4236bf2b3e7a91e11dd67037c5dc3262382fd8c77ce333b49f30d6e4b93a6f`.
+- Upstream Model X-Ray fissato a `a880e332f556fc71faf8d3753931005d5d019339`.
+- Payload v2 sintetici deterministici; 203 payload/identità nello smoke test Mac; 40/40 validation e 40/40 test dichiarati e coerenti con i CSV.
+
+**Avvertenza di versioning:** il `project_commit` della campagna test Ubuntu è `f5bf86b237ca61f1d845732be41aa24203855921`, mentre il report Mac indica HEAD `59f556c`. L'identità dei byte di codice tra questi due commit **non è stata ancora dimostrata**: prima di attribuire gli scostamenti al solo hardware è necessario verificare `git diff` sulle sorgenti sperimentali. L'hash del runner Mac non è incluso nel materiale fornito. Le piccole differenze possono dipendere anche dalla variabilità di training non bitwise.
+
+### 7.2 Risultati test E1 v2 — centroid (10 ripetizioni per X)
+
+| X-LSB | AUROC Ubuntu x86_64 | AUROC Mac ARM64 | Δ Mac − Ubuntu | Accuracy Youden Ubuntu | Accuracy Youden Mac | FPR Youden Ubuntu | FPR Youden Mac |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| **1** | 0.500150 | 0.500209 | +0.000059 | 0.50025 | 0.50075 | 0.5180 | 0.4595 |
+| **8** | 0.508232 | 0.509388 | +0.001156 | 0.50375 | 0.50350 | 0.4315 | 0.4605 |
+| **16** | 0.501293 | 0.501425 | +0.000132 | 0.49850 | 0.50125 | 0.3735 | 0.3470 |
+| **23** | 0.901863 | 0.904378 | +0.002515 | 0.82125 | 0.82300 | 0.1550 | 0.1605 |
+
+Sono medie sui **200 checkpoint di test distinti** per ciascuna replica, con 200 versioni benign e 200 stego. La soglia Youden è scelta nella validation dello stesso fit, **non ottimizzata sul test**. In particolare, a X=23 la differenza di AUROC **Mac − Ubuntu è +0,002515**, e quella di accuracy Youden è **+0,00175** (0,175 punti percentuali). Queste differenze **non dimostrano superiorità del Mac** e non sono un test di significatività statistica.
+
+### 7.3 Dettagli Mac: validation della campagna test, 1-NN e tempi
+
+| X | AUROC centroid validation nei fit test Mac | AUROC centroid test Mac |
+|---:|---:|---:|
+| 1 | 0.500254 | 0.500209 |
+| 8 | 0.495828 | 0.509388 |
+| 16 | 0.502669 | 0.501425 |
+| 23 | 0.883028 | 0.904378 |
+
+A X=23, anche il classificatore secondario **1-NN** mantiene segnale di detection: AUROC test **0,815734 Ubuntu** e **0,819226 Mac**. La classifica centroid > 1-NN a X23 è coerente sulle due piattaforme, ma senza un test appaiato dei punteggi non formuliamo una conclusione di significatività statistica.
+
+Fabrizio riporta **circa 100–110 secondi per fit test** su M4, senza OOM, esecuzione in processi isolati e utilizzo di `caffeinate` per evitare la sospensione del Mac. Questo è un dato operativo riferito alla sua macchina, non un benchmark hardware scientificamente controllato. Su Ubuntu era stato necessario introdurre l'isolamento per processo dopo un OOM nel precedente runner v1.
+
+### 7.4 Verifiche eseguite sugli allegati e lacune residue
+
+Il pacchetto ricevuto contiene `summary.csv` (32 righe: 16 validation + 16 test), `metrics_per_run.csv` (320 righe: 160 + 160) e `e1_v2_test.log`. Abbiamo ricalcolato direttamente dai 320 record tutte le medie di accuracy, AUROC, AUPRC, F1 e FPR riportate in `summary.csv` e verificato **40 coppie (replica, X) per ognuno dei due stage**.
+
+**Non sono stati allegati** il CSV riepilogativo della campagna di **validation stand-alone Mac**, il relativo log completo, i manifest payload per singolo checkpoint e il `run_config.json` della replica. Sono quindi attestati dal resoconto di Fabrizio, ma non verificabili direttamente tramite i tre file consegnati. La validation **dentro** la campagna test è invece documentata e verificata nei CSV. È opportuna una verifica di `git diff f5bf86b..59f556c -- scripts/ manifests/` prima di definire la replica *code-identical*.
+
+### 7.5 Grafici del confronto fra piattaforme
+
+- [AUROC Ubuntu vs Mac, centroid](../results/figures/e1/e1_platform_auroc.png).
+- [Accuracy test con Youden, Ubuntu vs Mac](../results/figures/e1/e1_platform_accuracy_youden.png).
+- [FPR test con Youden, Ubuntu vs Mac](../results/figures/e1/e1_platform_fpr_youden.png).
+- [AUROC centroid vs 1-NN sulle due piattaforme](../results/figures/e1/e1_platform_methods.png).
+- [Validation nei fit test e test, due piattaforme](../results/figures/e1/e1_platform_validation_test.png).
+- [Excel unico E1, foglio **Confronto_piattaforme** con grafici modificabili](../results/figures/e1/E1_grafici.xlsx).
+
+**Conclusione della replica:** il comportamento qualitativo E1 è riprodotto su due piattaforme CPU differenti, a parità degli hash di pesi e split e con risultati quantitativi prossimi. Ciò rafforza la credibilità operativa del benchmark **ID** ma non è una prova di generalizzazione a CNN di altra architettura, né garantisce uguaglianza bitwise.
+
+---
+
+## 8. Discussione
+
+**Messaggio principale.** La replica Mac M4 conferma qualitativamente la baseline Ubuntu, con AUROC X23 rispettivamente 0,904378 e 0,901863. Nel setting E1 il metodo centroid discrimina bene campioni benign/stego quando si sovrascrivono **23 bit di mantissa** (AUROC media ~0,902), ma ha un comportamento vicino al caso per **X=1,8,16** (AUROC 0,500–0,508). Questo è un risultato sul **particolare zoo e protocollo few-shot** studiati, non una misura universale di efficacia contro stegomalware.
 
 La forte transizione a X23 è compatibile con un cambiamento molto più pronunciato della distribuzione dei pesi. Dal solo risultato di detection **non** possiamo inferire che un payload X23 mantenga inalterata l'utilità dei CNN, sia furtivo, venga recuperato esattamente o rappresenti malware eseguibile. Analogamente, il risultato quasi-casuale a X≤16 non prova che ogni possibile detector fallirebbe.
 
@@ -203,9 +264,9 @@ La forte transizione a X23 è compatibile con un cambiamento molto più pronunci
 
 **Statistica.** La media sulle 10 ripetizioni descrive la variabilità del training e dei payload, ma un'inferenza rigorosa sul mondo esterno dovrebbe rispettare l'accoppiamento benign/stego e l'unità indipendente **checkpoint di origine**. Non attribuiamo p-value, intervalli di confidenza o differenze significative non calcolate.
 
-## 8. Limiti e validità delle conclusioni
+## 9. Limiti e validità delle conclusioni
 
-1. **Un solo zoo, un'architettura/popolazione di checkpoint.** Validità esterna non dimostrata.
+1. **Un solo zoo, un'architettura/popolazione di checkpoint.** Anche il Mac M4 misura lo stesso zoo e non aumenta la diversità di architettura neurale; validità esterna non dimostrata.
 2. **Checkpoint test identity-disjoint ma non zoo-disjoint** e precedente esplorazione del medesimo zoo. Non chiamare il test incontaminato in senso assoluto.
 3. **Few-shot estremo:** 3 identità train (6 osservazioni), 10 repliche; risultati sensibili alla casualità di training, specialmente vicino a score zero.
 4. **Precisione numerica:** un run della validation v2 si è fermato per 1/400 discordanza fra margine e inferenza upstream; diagnostica successiva 0/400. Non è stata dimostrata determinismo TensorFlow bit-a-bit.
@@ -214,16 +275,19 @@ La forte transizione a X23 è compatibile con un cambiamento molto più pronunci
 7. **Classi bilanciate al 50%.** AUPRC dipende dalla prevalenza; deployment con prevalenze differenti richiede una valutazione specifica.
 8. **Incertezza limitata.** Nella tabella di sintesi è disponibile SD dell'accuracy; non sono stati stimati IC cluster-aware e TPR@FPR molto basse non sarebbero giustificati da 200 benign test.
 9. **Solo detection.** Attacco fattibile, recovery, execution, degrado di accuracy CNN e compromissione reale dei modelli non misurati.
+10. **Confronto fra piattaforme.** Commit Mac e Ubuntu differenti; assenza di full run_config/manifest Mac e validation stand-alone allegata; nessuna prova che le piccole differenze siano causate unicamente da CPU o sistema operativo.
 
-## 9. Conclusione E1 e collegamento a E2/E3
+## 10. Conclusione E1 e collegamento a E2/E3
 
-E1 conclude un **baseline sperimentale** su 1.000 checkpoint autentici con split identità-disgiunti, esempi paired, payload sintetici tracciati, 40 fit di validation e 40 fit sul test riservato. In questo regime, **X23 è rilevabile con AUROC media 0,901863** dal centroid few-shot, mentre **X≤16 resta vicino a 0,5**. La calibrazione su validation produce **accuracy media test 0,82125** e **FPR 0,1550** a X23.
+E1 conclude una **baseline sperimentale replicata su Ubuntu CPU x86_64 e Mac M4 CPU ARM64** su 1.000 checkpoint autentici con split identità-disgiunti, esempi paired, payload sintetici tracciati, 40 fit di validation e 40 fit sul test riservato. In questo regime, **X23 è rilevabile con AUROC media 0,901863 (Ubuntu) e 0,904378 (Mac)** dal centroid few-shot, mentre **X≤16 resta vicino a 0,5**. La calibrazione su validation produce **accuracy media test 0,82125** e **FPR 0,1550** a X23.
 
-Il risultato non è una nuova difesa, né dimostra OOD generalization. **E2** confronterà il detector con un embedding di famiglia diversa non visto nell'addestramento; **E3** verificherà se i risultati resistono a controlli più forti su origine e trasformazioni. Il quadro di ricerca seguirà criteri di comparabilità e pre-registrazione delle scelte, senza sfruttare il test E1 per decidere retroattivamente i parametri.
+La replica cross-platform riproduce il comportamento **a livello aggregato** e non è una prova di equivalenza bitwise o attribuzione causale delle differenze al solo hardware. Il risultato non è una nuova difesa, né dimostra OOD generalization. **E2** confronterà il detector con un embedding di famiglia diversa non visto nell'addestramento; **E3** verificherà se i risultati resistono a controlli più forti su origine e trasformazioni. Il quadro di ricerca seguirà criteri di comparabilità e pre-registrazione delle scelte, senza sfruttare il test E1 per decidere retroattivamente i parametri.
 
-## 10. Materiali, riferimenti e provenienza delle affermazioni
+## 11. Materiali, riferimenti e provenienza delle affermazioni
 
 **Dati primari** (da usare per qualunque citazione numerica):
+
+- **Replica Fabrizio Mac M4:** `results/replicas/e1_mac_m4/{summary.csv,metrics_per_run.csv,e1_v2_test.log,replication_manifest.md}`. I CSV sono estratti senza modificarli dallo ZIP fornito da Fabrizio e le medie sono state ricontrollate.
 
 - `results/validation/e1_uniform_v2/{summary.csv,metrics_per_run.csv,run_config.json}`.
 - `results/test/e1_uniform_v2/{summary.csv,metrics_per_run.csv,run_config.json}`.
