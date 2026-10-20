@@ -21,3 +21,7 @@
 | E3 | Da svolgere (alcuni controlli già in E1) | Nessun audit finale |
 
 Le figure sono generate dai CSV del repository. La validazione esterna cross-zoo e la utility dei CNN sotto attacco non sono state misurate in E1.
+
+## Replica Mac M4 integrata — 20 ottobre 2026
+
+Il report E1 include ora il confronto fra i run di Riccardo su Ubuntu CPU x86_64 e di Fabrizio su Mac M4 CPU ARM64. La replica Mac si trova in `../results/replicas/e1_mac_m4/` e le figure cross-platform si rigenerano con `python scripts/plot_e1_comparison.py` dalla root. Questa è una replica dello stesso protocollo e stesso zoo: **non** è un test cross-architecture delle CNN e non sostituisce E2.

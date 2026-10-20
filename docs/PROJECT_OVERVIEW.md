@@ -1,6 +1,6 @@
 # Beyond the X-Ray — progetto di Machine Learning Security
 
-**Stato del documento:** introduzione e impostazione sperimentale del progetto d'esame (ottobre–dicembre 2026).  
+**Stato del documento:** panoramica aggiornata dopo la replica indipendente Mac M4; introduzione e impostazione sperimentale del progetto d'esame (ottobre–dicembre 2026).  
 **Collaborazione:** Riccardo e Fabrizio.  
 **Riferimento metodologico:** [Model X-Ray](https://github.com/danigil/ModelXRay).  
 **E1:** concluso il 19 ottobre 2026, commit dei risultati `d35f8f2`; **E2, E3:** da svolgere.  
@@ -72,3 +72,10 @@ La fase ottobre–dicembre 2026 mira al **progetto d'esame**: replica, esperimen
 - [Risultati test](../results/test/e1_uniform_v2/summary.csv)
 - [Grafici E1 e cartella Excel](../results/figures/e1/E1_grafici.xlsx)
 - Fonte di pianificazione: `Roadmap_Progetto_Tesi_Paper_IEEE_con_Letture(7).docx` (documento fornito al gruppo; non necessariamente da aggiungere al repository).
+
+
+## Aggiornamento E1 — replica cross-platform (20 ottobre 2026)
+
+Il protocollo E1 v2 su 1.000 checkpoint reali GHRP/STL10 è stato replicato da Fabrizio su **Apple Silicon M4 ARM64 (CPU)** rispetto al run di Riccardo su **Ubuntu 24.04 x86_64 in VirtualBox (CPU)**. Sono due **architetture hardware** distinte, NON due architetture differenti di CNN. Hash dei pesi, split e commit upstream corrispondono. Il confronto a X23 dà AUROC centroid **0,901863 Ubuntu** e **0,904378 Mac**; per X≤16 entrambi sono vicini al caso. La validation nel CSV della campagna test Mac e il test contengono tutti i 40 run, con medie verificate dai dati per-replica.
+
+La replica costituisce un controllo di riproducibilità cross-platform a livello aggregato, non un esperimento E2/OOD né un confronto causale delle CPU. Il run Mac dichiara HEAD `59f556c` e Ubuntu `f5bf86b`: resta da controllare il diff del runner. Per maggiori dettagli: [report E1](../exam/E1_REPORT.md), [manifest replica Mac](../results/replicas/e1_mac_m4/replication_manifest.md).

@@ -52,3 +52,14 @@ git push origin ricky
 ## 5. Ambito e provenienza
 
 Il dossier è una **bozza tecnica per il progetto d'esame** ricostruita dai log, dalla roadmap di progetto e dalla struttura dichiarata della repository. Prima di usarlo come relazione ufficiale verificare tutte le cifre sui CSV, controllare con Fabrizio il registro dei contributi e integrare una bibliografia formale con il docente.
+
+## Aggiornamento cross-platform — replica Fabrizio Mac M4
+
+Il pacchetto aggiornato aggiunge `results/replicas/e1_mac_m4/`, i nuovi grafici cross-platform, i 320 record per-run Mac e due script:
+
+```bash
+python scripts/check_e1_replication.py
+python scripts/plot_e1_comparison.py
+```
+
+Non riesegue alcun training. `E1_grafici.xlsx` include i dati originali Ubuntu versionati in precedenza e nuovi fogli Mac / Confronto_piattaforme con grafici Excel modificabili.
