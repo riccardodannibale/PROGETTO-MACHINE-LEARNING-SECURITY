@@ -1,0 +1,20 @@
+{
+  "mac_source_archive_sha256": "3afd0f33c08a74d5602e6b66b75a7f867de6007ab4648adc79959d856f4877b3",
+  "file_sha256": {
+    "mac_environment.txt": "cd683ddf0b72bc28edc0f9a8a6e0f8d959f5117fec84cc95d3b268d62cd990e8",
+    "run_config_test.json": "034d5b2f05869a5a65b723ea469b2dde7a041a5b8dc0f3ea91dca014e7457f9f",
+    "run_config_validation.json": "09c617ac3ffb7b5d9ab7fa1805b38cd003c8be31b8dd0e959411d06029f5d855",
+    "validation_standalone_summary.csv": "8441cb3352345c010a244d1e7caa6437ba5d12781b7bbc914ae84c3e6a0ac1f5",
+    "payload_manifest_r00_x23.csv": "410d41d1ca59c56a5bf9e9f6ead96e348d789bf1774b3a27bfa5f00d0c601804",
+    "summary.csv": "82506e9754def77270f87c9fea2c75a0a15e7dc70aa077289416b72e0eadeabe",
+    "metrics_per_run.csv": "f8783ad49489396a3ee3c5f34a47c291ddc97aed0da2b693008240cb15d7f84f"
+  },
+  "runner_sha256_verified_in_supplied_upstream_copy": "a75aa3d844bb695a6d6155fe808394025b04c480d74d1e1b856eec5ca6f9c037",
+  "mac_payload_checks_verified": 403,
+  "payload_check_errors": 0,
+  "mac_csv_rows": 320,
+  "mac_standalone_validation_summary_rows": 16,
+  "ubuntu_per_run_in_uploaded_artifacts": false,
+  "ubuntu_mean_elapsed_sec_from_user_console": 217.124,
+  "mac_mean_elapsed_sec_from_mac_csv": 104.412
+}

@@ -1,9 +1,9 @@
 # E1 — Rilevamento in-distribution di embedding LSB su pesi reali di CNN
 
 **Progetto:** Beyond the X-Ray — Machine Learning Security, lavoro condiviso Riccardo–Fabrizio.
-**Chiarimento:** «due architetture» qui indica le **piattaforme di calcolo** (Ubuntu/CPU x86_64 virtualizzata e macOS/ARM64 M4), **non due architetture differenti di reti CNN**. Il dataset e il protocollo E1 rimangono gli stessi.  
-**Chiusura su Ubuntu:** 19 ottobre 2026. **Replica cross-platform ricevuta:** 20 ottobre 2026. **Stato:** E1 completato e replicato su due piattaforme; E2 ed E3 ancora da eseguire.  
-**Risultati Ubuntu versionati:** commit [`d35f8f2`](https://github.com/riccardodannibale/PROGETTO-MACHINE-LEARNING-SECURITY/commit/d35f8f2), branch `ricky`. **Replica Fabrizio:** file `results/replicas/e1_mac_m4/`; HEAD Mac dichiarato `59f556c` (diff del codice da verificare).  
+**Chiarimento:** «due architetture» qui indica le **piattaforme di calcolo** (Ubuntu/CPU x86_64 virtualizzata e macOS/ARM64 M4), **non due architetture differenti di reti CNN**. Il dataset e il protocollo E1 rimangono gli stessi.
+**Chiusura su Ubuntu:** 19 ottobre 2026. **Replica cross-platform ricevuta:** 20 ottobre 2026. **Stato:** E1 completato e replicato su due piattaforme; E2 ed E3 ancora da eseguire.
+**Risultati Ubuntu versionati:** commit [`d35f8f2`](https://github.com/riccardodannibale/PROGETTO-MACHINE-LEARNING-SECURITY/commit/d35f8f2), branch `ricky`. **Replica Fabrizio:** file `results/replicas/e1_mac_m4/`; commit Mac `59f556c` (diff dei file esecutivi dichiarato vuoto da Fabrizio; hash SHA-256 del runner verificato).
 **Metodologia:** protocollo *few-shot* adattato da Model X-Ray; non replica numerica esatta delle tabelle pubblicate dagli autori.
 
 > **Risultato sintetico.** Sul test interno con checkpoint sorgente distinti, il detector *centroid* raggiunge, a **X=23**, AUROC media **0,901863 su Ubuntu x86_64** e **0,904378 su Mac M4 ARM64**, entrambe su 10 ripetizioni. Accuracy con soglia scelta esclusivamente sulla validation: **82,125% su Ubuntu** e **82,300% su Mac**. Per X=1,8,16 l'AUROC è prossima a 0,5. Questo risultato non costituisce una dimostrazione di generalizzazione OOD né di attacco steganografico funzionalmente indisturbato.
@@ -209,7 +209,7 @@ Integrità dichiarata e confrontabile:
 - Upstream Model X-Ray fissato a `a880e332f556fc71faf8d3753931005d5d019339`.
 - Payload v2 sintetici deterministici; 203 payload/identità nello smoke test Mac; 40/40 validation e 40/40 test dichiarati e coerenti con i CSV.
 
-**Avvertenza di versioning:** il `project_commit` della campagna test Ubuntu è `f5bf86b237ca61f1d845732be41aa24203855921`, mentre il report Mac indica HEAD `59f556c`. L'identità dei byte di codice tra questi due commit **non è stata ancora dimostrata**: prima di attribuire gli scostamenti al solo hardware è necessario verificare `git diff` sulle sorgenti sperimentali. L'hash del runner Mac non è incluso nel materiale fornito. Le piccole differenze possono dipendere anche dalla variabilità di training non bitwise.
+**Versioning e integrità aggiornati (audit 20 ottobre).** Il `project_commit` del test Ubuntu è `f5bf86b237ca61f1d845732be41aa24203855921`; quello Mac è `59f556c78c8f7b0f1dac60bbe41748415ac0a71b`. Fabrizio ha eseguito `git diff` sui file sperimentali e **riferisce che il diff è vuoto**; l’output testuale del diff non è incluso nell’archivio ricevuto. Separatamente, è stato verificato l’hash SHA-256 del runner conservato tra gli artefatti di lavoro: `a75aa3d844bb695a6d6155fe808394025b04c480d74d1e1b856eec5ca6f9c037`, coincidente con quello comunicato da Fabrizio. L’upstream e gli SHA di pesi e split coincidono nei `run_config.json` Mac. La conformità del runner non implica training bitwise-identico né consente di attribuire causalmente i residui al processore.
 
 ### 7.2 Risultati test E1 v2 — centroid (10 ripetizioni per X)
 
@@ -239,7 +239,7 @@ Fabrizio riporta **circa 100–110 secondi per fit test** su M4, senza OOM, esec
 
 Il pacchetto ricevuto contiene `summary.csv` (32 righe: 16 validation + 16 test), `metrics_per_run.csv` (320 righe: 160 + 160) e `e1_v2_test.log`. Abbiamo ricalcolato direttamente dai 320 record tutte le medie di accuracy, AUROC, AUPRC, F1 e FPR riportate in `summary.csv` e verificato **40 coppie (replica, X) per ognuno dei due stage**.
 
-**Non sono stati allegati** il CSV riepilogativo della campagna di **validation stand-alone Mac**, il relativo log completo, i manifest payload per singolo checkpoint e il `run_config.json` della replica. Sono quindi attestati dal resoconto di Fabrizio, ma non verificabili direttamente tramite i tre file consegnati. La validation **dentro** la campagna test è invece documentata e verificata nei CSV. È opportuna una verifica di `git diff f5bf86b..59f556c -- scripts/ manifests/` prima di definire la replica *code-identical*.
+**Materiali integrativi ora ricevuti e verificati.** Sono disponibili i `run_config.json` Mac di test e validation stand-alone, il relativo `validation_standalone_summary.csv`, il `payload_manifest_r00_x23.csv` (3 train + 200 validation + 200 test, 403 righe) e `mac_environment.txt`. Tutti e 403 gli SHA-256 dei payload sono stati **rigenerati indipendentemente** tramite lo schema `sha256-keyed-uint8-pcg64-per-model-v1` e coincidono. Le medie nel `summary.csv` della campagna test corrispondono ai 320 record Mac già presenti. Mancano tuttora il log per-run della validation stand-alone e il manifest payload Ubuntu corrispondente per un confronto riga-per-riga fra macchine. Il file ambiente Mac registra chip M4 10-core, 16 GB e macOS 27.0.1, ma mostra errori di shell durante il recupero delle versioni delle librerie: per Python/NumPy/TF restano validi i valori **dichiarati** nel resoconto precedente, non un rilevamento completo dal nuovo file.
 
 ### 7.5 Grafici del confronto fra piattaforme
 
@@ -253,6 +253,38 @@ Il pacchetto ricevuto contiene `summary.csv` (32 righe: 16 validation + 16 test)
 **Conclusione della replica:** il comportamento qualitativo E1 è riprodotto su due piattaforme CPU differenti, a parità degli hash di pesi e split e con risultati quantitativi prossimi. Ciò rafforza la credibilità operativa del benchmark **ID** ma non è una prova di generalizzazione a CNN di altra architettura, né garantisce uguaglianza bitwise.
 
 ---
+
+
+### 7.6 Audit finale dei file ricevuti (20 ottobre 2026)
+
+L’ultimo archivio consegnato da Fabrizio è acquisito **senza sovrascrivere i CSV finali già versionati**. La cartella `results/replicas/e1_mac_m4/audit/` comprende cinque sorgenti originali: `run_config_test.json`, `run_config_validation.json`, `validation_standalone_summary.csv`, `payload_manifest_r00_x23.csv` e `mac_environment.txt`, oltre ai riepiloghi derivati `platform_summary_aggregates.csv` e `audit_integrity.json`.
+
+**Riscontri indipendenti:**
+
+- I due `run_config.json` riportano gli stessi `weights_sha256`, `splits_sha256`, `upstream_commit`, seed 42, schema payload, lista X e parametri sperimentali; gli stage correttamente distinti sono `test` e `validation`. Il commit locale Mac differisce fra le due campagne, come registrato nei singoli file.
+- Il runner `run_e1_final_v2.py` della copia di lavoro fornita produce SHA-256 `a75aa3d844bb695a6d6155fe808394025b04c480d74d1e1b856eec5ca6f9c037`, lo stesso comunicato da Fabrizio per i due commit test. Fabrizio dichiara **diff vuoto sui file di esecuzione**; conservare output e comandi del diff in caso di review tecnica.
+- Il manifest `repeat=0`, `X=23` contiene **403 righe**: 3 train, 200 validation, 200 test. Tutti i **403 digest SHA-256 del payload** sono stati ricalcolati con seed per `row_index` e NumPy PCG64: **403/403 corrispondenze**. Ciò prova l’integrità del manifest rispetto allo schema, non una corrispondenza riga-per-riga con il manifest Ubuntu (non allegato).
+- Il `validation_standalone_summary.csv` contiene **16 righe** (4 X × 2 metodi × 2 politiche) e dichiara 10 ripetizioni per configurazione. A X=23, metodo centroid, **AUROC Mac validation stand-alone = 0,882700**. La validation dentro i *fit test* Mac misura invece **0,883028**: non sono la stessa campagna. Il riepilogo della validation separata è disponibile, ma i relativi per-run non sono stati inclusi nell'ultimo ZIP.
+- Il Mac ha **16 GB di RAM e 10 core CPU** (4 performance + 6 efficiency); il file ambiente registra macOS `27.0.1`, chip Apple M4 e `arm64`. Alcuni comandi della raccolta software sono falliti (`zsh: permission denied`), quindi il file non documenta da solo in modo esaustivo Python, NumPy e TF storici.
+
+### 7.7 Analisi descrittiva dei tempi e limiti hardware
+
+| Indicatore | Ubuntu 24.04 VirtualBox | Mac M4 CPU |
+|---|---:|---:|
+| Fit della campagna test distinti | 40 | 40 |
+| `elapsed_sec` medio per fit | **217,124 s** | **104,412 s** |
+| Totale dei 40 intervalli cronometrati | ~144,75 minuti | ~69,61 minuti |
+| Rapporto delle medie Ubuntu/Mac | **2,079** | riferimento |
+| Tempo end-to-end dell’intero processo | Non misurato | Non misurato |
+| Picco memoria confrontabile | Non misurato | Non misurato |
+
+La fonte dei tempi Ubuntu è l’**audit già eseguito sulla macchina di Riccardo** il 20 ottobre, con 40 fit deduplicati. La media Mac è stata anche ricalcolata dai 40 `elapsed_sec` univoci del CSV originale. `elapsed_sec` misura il tratto del runner cronometrato dopo una parte della preparazione dei dati e non include l'avvio Python: **non** può essere chiamato tempo end-to-end. Il rapporto **2,079** descrive il confronto tra *due ambienti storici*, non misura il vantaggio causale del chip M4; differiscono virtualizzazione, CPU, RAM, OS, build e possibili impostazioni di threading.
+
+Le differenze tra le **medie** delle AUROC si possono calcolare dai `summary.csv` (X23, Mac−Ubuntu = **+0,0025145**), ma la **dispersione delle differenze paired** richiede tutte e dieci le coppie di record Ubuntu e Mac. Sulla VM di Riccardo `scripts/audit_e1_platforms.py` ha già prodotto `paired_per_run.csv`, `metrics_by_x.csv`, `timing_by_x.csv` in `~/mlsec-local/audits/e1_hardware_comparison/`. Per completare un eventuale supplemento statistico nel repository, importare questi tre CSV senza alterare i test originali. Le coppie condividono le stesse identità di test e non sono campioni esterni indipendenti: un IC bootstrap sui soli 10 fit, se calcolato, descriverebbe la variabilità *dei fit condizionata a questo zoo*, non la generalizzazione a nuovi zoo.
+
+**Decisione operativa:** l’esperimento E1 è sufficientemente documentato e replicato per passare alla progettazione di E2. Un nuovo benchmark controllato di memoria/wall-clock può essere svolto in un’appendice separata, ma non è necessario ripetere 40 fit né riaprire il test E1.
+
+Figure aggiuntive: `e1_hw_auroc_comparison.png`, `e1_hw_mac_elapsed_by_x.png`, `e1_hw_mac_runs_auroc.png`. Workbook `E1_grafici.xlsx`: fogli aggiunti `Audit_hardware` e `Mac_val_standalone` (i 9 grafici precedenti sono conservati; sono stati aggiunti 2 grafici Excel nativi).
 
 ## 8. Discussione
 
@@ -299,3 +331,9 @@ La replica cross-platform riproduce il comportamento **a livello aggregato** e n
 **Letture:** [Model X-Ray, codice](https://github.com/danigil/ModelXRay); [MaleficNet](https://doi.org/10.1007/978-3-031-17143-7_21); [Do You Trust Your Model?](https://doi.org/10.1109/TDSC.2025.3586703); [GHRP STL10, Zenodo](https://zenodo.org/records/6631784). Le fonti citate in questa bozza richiedono completamento delle voci bibliografiche formali quando si redigerà la relazione d'esame definitiva.
 
 **Attenzione:** i risultati quantitativi di questo documento derivano dalle tabelle `summary.csv` fornite durante l'esecuzione; per aggiungere barre di errore AUROC, IC e curve ROC per checkpoint occorre rileggerne le metriche per-run e predizioni, senza inventare dati.
+
+### Appendice hardware e riproducibilità
+
+- Audit di dettaglio: [`E1_HARDWARE_FINAL_AUDIT.md`](../docs/E1_HARDWARE_FINAL_AUDIT.md).
+- Sorgenti ricevute: [`results/replicas/e1_mac_m4/audit/`](../results/replicas/e1_mac_m4/audit/).
+- I risultati Ubuntu e Mac originali restano immutati nelle cartelle `results/test/e1_uniform_v2/` e `results/replicas/e1_mac_m4/`.

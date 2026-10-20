@@ -122,3 +122,8 @@ python scripts/plot_e1_comparison.py
 ```
 
 Questo comando legge `results/test/e1_uniform_v2/summary.csv` (Ubuntu) e `results/replicas/e1_mac_m4/summary.csv` (Mac). Per riprodurre il test Mac ex novo, usare il protocollo del repo e registrare un nuovo run separato, senza sovrascrivere il test originale.
+
+
+## Aggiornamento audit hardware E1 (20 ottobre 2026)
+
+La replica Mac M4 è stata integrata con i `run_config.json`, la validation stand-alone e il manifest payload. 403/403 digest dei payload (`repeat=0`, `X=23`) sono stati rigenerati e verificati. L'hash del runner coincide (`a75aa3d844bb695a6d6155fe808394025b04c480d74d1e1b856eec5ca6f9c037`); Fabrizio riferisce che il diff dei file sperimentali tra `f5bf86b` e `59f556c` è nullo. Il rapporto descrittivo dei tempi `elapsed_sec` storici Ubuntu/Mac è **2,079**; non equivale a un rapporto causale delle CPU. Per dettagli consultare `docs/E1_HARDWARE_FINAL_AUDIT.md`. E1 è chiuso senza nuovi training; E2 è ancora in progettazione.
