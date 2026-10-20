@@ -1,9 +1,9 @@
 # Beyond the X-Ray — progetto di Machine Learning Security
 
-**Stato del documento:** panoramica aggiornata dopo la replica indipendente Mac M4; introduzione e impostazione sperimentale del progetto d'esame (ottobre–dicembre 2026).  
-**Collaborazione:** Riccardo e Fabrizio.  
-**Riferimento metodologico:** [Model X-Ray](https://github.com/danigil/ModelXRay).  
-**E1:** concluso il 19 ottobre 2026, commit dei risultati `d35f8f2`; **E2, E3:** da svolgere.  
+**Stato del documento:** panoramica aggiornata dopo la replica indipendente Mac M4; introduzione e impostazione sperimentale del progetto d'esame (ottobre–dicembre 2026).
+**Collaborazione:** Riccardo e Fabrizio.
+**Riferimento metodologico:** [Model X-Ray](https://github.com/danigil/ModelXRay).
+**E1:** concluso il 19 ottobre 2026, commit dei risultati `d35f8f2`; **E2, E3:** da svolgere.
 **Ambito:** esclusivamente progetto condiviso dell'esame; eventuale tesi individuale e paper costituiscono percorsi successivi e separati.
 
 ## 1. Background e motivazione
@@ -79,3 +79,8 @@ La fase ottobre–dicembre 2026 mira al **progetto d'esame**: replica, esperimen
 Il protocollo E1 v2 su 1.000 checkpoint reali GHRP/STL10 è stato replicato da Fabrizio su **Apple Silicon M4 ARM64 (CPU)** rispetto al run di Riccardo su **Ubuntu 24.04 x86_64 in VirtualBox (CPU)**. Sono due **architetture hardware** distinte, NON due architetture differenti di CNN. Hash dei pesi, split e commit upstream corrispondono. Il confronto a X23 dà AUROC centroid **0,901863 Ubuntu** e **0,904378 Mac**; per X≤16 entrambi sono vicini al caso. La validation nel CSV della campagna test Mac e il test contengono tutti i 40 run, con medie verificate dai dati per-replica.
 
 La replica costituisce un controllo di riproducibilità cross-platform a livello aggregato, non un esperimento E2/OOD né un confronto causale delle CPU. Il run Mac dichiara HEAD `59f556c` e Ubuntu `f5bf86b`: resta da controllare il diff del runner. Per maggiori dettagli: [report E1](../exam/E1_REPORT.md), [manifest replica Mac](../results/replicas/e1_mac_m4/replication_manifest.md).
+
+
+## Aggiornamento audit hardware E1 (20 ottobre 2026)
+
+La replica Mac M4 è stata integrata con i `run_config.json`, la validation stand-alone e il manifest payload. 403/403 digest dei payload (`repeat=0`, `X=23`) sono stati rigenerati e verificati. L'hash del runner coincide (`a75aa3d844bb695a6d6155fe808394025b04c480d74d1e1b856eec5ca6f9c037`); Fabrizio riferisce che il diff dei file sperimentali tra `f5bf86b` e `59f556c` è nullo. Il rapporto descrittivo dei tempi `elapsed_sec` storici Ubuntu/Mac è **2,079**; non equivale a un rapporto causale delle CPU. Per dettagli consultare `docs/E1_HARDWARE_FINAL_AUDIT.md`. E1 è chiuso senza nuovi training; E2 è ancora in progettazione.

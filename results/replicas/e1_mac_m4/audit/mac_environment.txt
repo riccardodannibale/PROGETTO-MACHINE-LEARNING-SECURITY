@@ -1,0 +1,16 @@
+2026-10-20T12:04:09Z
+ProductName:		macOS
+ProductVersion:		27.0.1
+BuildVersion:		26A434
+arm64
+10
+17179869184
+      Model Name: MacBook Air
+      Chip: Apple M4
+      Total Number of Cores: 10 (4 Performance and 6 Efficiency)
+      Memory: 16 GB
+zsh: permission denied: 
+zsh: permission denied: 
+zsh: permission denied: 
+59f556c78c8f7b0f1dac60bbe41748415ac0a71b
+ a880e332f556fc71faf8d3753931005d5d019339 external/ModelXRay (heads/rev)
