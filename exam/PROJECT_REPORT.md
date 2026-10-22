@@ -1,9 +1,9 @@
 # Beyond the X-Ray — Relazione integrata del progetto di Machine Learning Security
 
-**Esperimenti E1 + E2 | versione consolidata: 22 ottobre 2026**
+**Esperimenti E1 + E2 + E3 | versione consolidata: 22 ottobre 2026**
 **Autori del lavoro sperimentale:** Riccardo e Fabrizio
 **Ambito:** progetto universitario per la sessione di dicembre 2026; percorso di tesi magistrale individuale (2027) distinto, eventuale paper successivo non incluso nella consegna.
-**Repository di lavoro:** `PROGETTO-MACHINE-LEARNING-SECURITY`, branch `ricky`, risultati E2 archiviati nel commit `ee2dd82`.
+**Repository di lavoro:** `PROGETTO-MACHINE-LEARNING-SECURITY`, branch `ricky`; E2 archiviato nel commit `ee2dd82`, codice E3 nel commit `e82a4d8`. Risultati E3 incrociati auditati sulle due piattaforme e documentati nella Parte III.
 
 > **Risultato essenziale.** Sullo zoo GHRP/STL10 di 1.000 CNN autentiche, un detector Siamese Model X-Ray addestrato su soli **tre checkpoint benigni e tre derivati X-LSB X=23** rileva l'attacco noto in test con **AUROC centroid media 0,9043** in entrambe le piattaforme. Quando lo *stesso detector per fit*, senza riaddestramento e senza nuova calibrazione, incontra un embedding **spread-spectrum sintetico a 16 bit** non visto in training, l'AUROC scende a **0,4776 Ubuntu** e **0,4745 Mac M4** per α=0,24. **ΔAUROC OOD−ID = −0,4267 Ubuntu, −0,4298 Mac.** Le due tecniche non sono matched per norma relativa o capacità: il risultato misura questo shift sperimentale, non una proprietà universale di MaleficNet o della steganografia.
 
@@ -13,11 +13,11 @@
 |---|---|---|---|
 | **E1 — Baseline ID** | Il detector riconosce X-LSB su identità mai usate nel training? | X ∈ {1,8,16,23}; 10 ripetizioni per X, train 3+3 | A X=23: AUROC centroid **0,901863 Ubuntu**, **0,904378 Mac**. |
 | **E2 — Attack-family shift** | La detection trasferisce a embedding non visto? | Train/val LSB X=23; test ID LSB vs OOD spread α=0,24/0,16; 10 fit | **ΔAUROC primario −0,426652 Ubuntu, −0,429800 Mac**. |
-| **E3 — Controlli futuri** | La caduta dipende dalla famiglia, dall'intensità o da altre scorciatoie? | Attacchi e perturbazioni non-stego matched; nuovi zoo | **Non eseguito**: proposte preregistrabili, non risultati. |
+| **E3 — Controlli retrospettivi** | Quanto della perdita OOD si associa ai campioni positivi anziché a benigni/identità/soglie? | Coppie 1:1, metadati bilanciati, benigni e FPR fissi; 10 fit, 2 piattaforme | **Completato**: TPR centroid α=0,24 **0,1815 Ubuntu**, **0,1785 Mac**; FPR invariato per piattaforma. |
 
 ### Guida alla lettura e stato delle fonti
 
-Il presente documento **prosegue il report E1 esistente**. La **Parte I** ne preserva la metodologia, i valori e il percorso sperimentale, aggiornando soltanto i riferimenti temporali a E2 dove sono diventati superati. La **Parte II** aggiunge l'intero esperimento E2: motivazione, differenze fra famiglie di embedding, implementazione concreta, gate G1–G7, audit, risultati, limiti e riferimenti. I due esperimenti sono **un lavoro di corso**, non un articolo scientifico già pubblicato dagli studenti.
+Il presente documento **prosegue il report E1 esistente**. La **Parte I** ne preserva la metodologia, i valori e il percorso sperimentale, aggiornando soltanto i riferimenti temporali a E2 dove sono diventati superati. La **Parte II** aggiunge l'intero esperimento E2: motivazione, differenze fra famiglie di embedding, implementazione concreta, gate G1–G7, audit, risultati, limiti e riferimenti. La **Parte III** descrive E3, audit retrospettivo delle coppie e dei metadati sugli score E2, con verifica incrociata Ubuntu/Mac e senza nuovo training. I tre esperimenti sono **un lavoro di corso**, non un articolo scientifico già pubblicato dagli studenti.
 
 La base E1 impiegata è la copia completa disponibile del documento `exam/E1_REPORT.md`/`.docx`, con audit hardware Ubuntu/Mac. **Non è stato possibile leggere direttamente la versione più recente di `exam/` dal server GitHub** durante la composizione; per questo il nuovo report viene consegnato come `exam/PROJECT_REPORT.md` e `exam/PROJECT_REPORT.docx`, **senza sostituire o cancellare** `exam/E1_REPORT.*`. Prima del commit è opportuno confrontare la Parte I con l'E1 locale della branch `ricky`.
 
@@ -27,7 +27,7 @@ La base E1 impiegata è la copia completa disponibile del documento `exam/E1_REP
 
 **Progetto:** Beyond the X-Ray — Machine Learning Security, lavoro condiviso Riccardo–Fabrizio.
 **Chiarimento:** «due architetture» qui indica le **piattaforme di calcolo** (Ubuntu/CPU x86_64 virtualizzata e macOS/ARM64 M4), **non due architetture differenti di reti CNN**. Il dataset e il protocollo E1 rimangono gli stessi.
-**Chiusura su Ubuntu:** 19 ottobre 2026. **Replica cross-platform ricevuta:** 20 ottobre 2026. **Stato storico al 20 ottobre:** E1 completato e replicato; **aggiornamento del 22 ottobre:** E2 ora completato (Parte II), E3 non ancora eseguito.
+**Chiusura su Ubuntu:** 19 ottobre 2026. **Replica cross-platform ricevuta:** 20 ottobre 2026. **Stato storico al 20 ottobre:** E1 completato e replicato; **aggiornamento del 22 ottobre:** E2 completato (Parte II) e successivamente E3 completato (Parte III).
 **Risultati Ubuntu versionati:** commit [`d35f8f2`](https://github.com/riccardodannibale/PROGETTO-MACHINE-LEARNING-SECURITY/commit/d35f8f2), branch `ricky`. **Replica Fabrizio:** file `results/replicas/e1_mac_m4/`; commit Mac `59f556c` (diff dei file esecutivi dichiarato vuoto da Fabrizio; hash SHA-256 del runner verificato).
 **Metodologia:** protocollo *few-shot* adattato da Model X-Ray; non replica numerica esatta delle tabelle pubblicate dagli autori.
 
@@ -51,9 +51,9 @@ La domanda è: **un detector basato su Model X-Ray riproduce un comportamento mi
 |---|---|---|---|---|
 | **E1 — ID** | Stabilire baseline robusta su attacco noto. | LSB su CNN del dataset selezionato. | LSB su checkpoint mai usati nell'addestramento, stesso zoo. | **Concluso**, 40 validation + 40 test, v2. |
 | **E2 — OOD attack shift** | Misurare generalizzazione a una famiglia di embedding non vista. | LSB, come E1. | Nuova famiglia di embedding; evitare cambi di architettura e attack family simultanei. | **Completato in seguito**, 22 ottobre 2026; risultati in Parte II. |
-| **E3 — controlli** | Cercare scorciatoie e leakage. | Protocollo matched. | Bilanciamento, provenance, serializzazione/metadati, altri fattori confondenti. | **Pianificato**, con alcune garanzie di base già in E1. |
+| **E3 — controlli** | Audit retrospettivo di coppie e alcune scorciatoie. | Score E2 senza nuovo training. | Bilanciamento 1:1, identificatori/sha, score benigni, FPR/TPR, concordanza matched e replica Mac. | **Completato**, Parte III; altri confondenti restano aperti. |
 
-Al momento della redazione originale E1, E2 ed E3 non erano ancora risultati acquisiti. La Parte II, redatta dopo il completamento di E2, riporta ora i risultati effettivamente ottenuti; E3 resta da realizzare. L'eventuale percorso di tesi individuale e un possibile paper sono distinti dalla consegna dell'esame.
+Al momento della redazione originale E1, E2 ed E3 non erano ancora risultati acquisiti. Le Parti II e III, redatte dopo il completamento degli esperimenti, riportano i risultati E2 ed E3 realmente osservati. I controlli intensity-matched e nuovi zoo rimangono futuri. L'eventuale percorso di tesi individuale e un possibile paper sono distinti dalla consegna dell'esame.
 
 #### 1.3 Obiettivo specifico E1 e ipotesi
 
@@ -650,7 +650,7 @@ La proposizione più forte *«il detector è cieco allo spread-spectrum in gener
 
 #### 19.2 Perché il confronto non isola causalmente la sola attack family
 
-X-LSB X=23 e spread α=0,24 non condividono una scala di intensità equivalente: nel G2 il loro rel-L2 medio era **0,312615 vs 0,24**. Anche il numero di bit payload codificati è radicalmente diverso. Il detector potrebbe rispondere tanto alla distribuzione e alla magnitudine della perturbazione quanto alla firma della famiglia di embedding. Il fatto che il pilot utility G3-C avesse mostrato un impatto medio più elevato di X-LSB sull'accuracy è coerente con questa differenza, ma non fornisce una scomposizione causale. **Questa è la motivazione primaria per E3**, che dovrà introdurre perturbazioni non stego e intensità/payload *matched*.
+X-LSB X=23 e spread α=0,24 non condividono una scala di intensità equivalente: nel G2 il loro rel-L2 medio era **0,312615 vs 0,24**. Anche il numero di bit payload codificati è radicalmente diverso. Il detector potrebbe rispondere tanto alla distribuzione e alla magnitudine della perturbazione quanto alla firma della famiglia di embedding. Il fatto che il pilot utility G3-C avesse mostrato un impatto medio più elevato di X-LSB sull'accuracy è coerente con questa differenza, ma non fornisce una scomposizione causale. **Questa è la motivazione primaria per E3**, che rende necessari, in uno studio successivo, controlli non-stego e intensità/payload *matched*. E3 in questo progetto ha svolto invece l'audit matched degli identificatori e dei benigni (Parte III).
 
 #### 19.3 Test interno, visibilità pregressa e replicabilità
 
@@ -670,7 +670,7 @@ L'oggetto della detection in E2 è l'incorporamento di **bit sintetici non esegu
 
 **Precisione e riproducibilità.** Il runner è hash-pinned, gli esempi e i semi sono registrati e gli audit hanno confermato gli output. Il confronto Mac/Ubuntu è numericamente vicino ma non bitwise identico. Lo ZIP finale Mac rende disponibili `summary.csv`, `paired_auroc_per_repeat.csv` e `metrics_per_run.csv`; l'audit originale delle predizioni è attestato dal log sul Mac, mentre i CSV delle predizioni restano conservati nell'ambiente originale.
 
-**Controlli E3 proposti, NON ancora eseguiti.** (i) Perturbazioni casuali **non stego** con norma L2 appaiata, per distinguere un rilevatore di anomalie numeriche da uno di messaggi incorporati. (ii) Condizioni LSB e spread a intensità relativa confrontabile, preregistrate usando solo train/validation. (iii) Variazione della lunghezza del messaggio e della capacità per ridurre lo sbilanciamento dei payload. (iv) Test di qualità funzionale su più CNN e più immagini. (v) Nuovi zoo/architetture con checkpoint e preprocessing indipendenti, come obiettivo della tesi magistrale 2027. Nessuno di questi controlli modifica retroattivamente le AUROC E2.
+**Controlli ulteriori, NON eseguiti in E3.** Il controllo E3 reale, documentato nella Parte III, è stato retrospettivo e ha verificato coppie/metadati/benigni/FPR. Restano proposte per una nuova ricerca: (i) Perturbazioni casuali **non stego** con norma L2 appaiata, per distinguere un rilevatore di anomalie numeriche da uno di messaggi incorporati. (ii) Condizioni LSB e spread a intensità relativa confrontabile, preregistrate usando solo train/validation. (iii) Variazione della lunghezza del messaggio e della capacità per ridurre lo sbilanciamento dei payload. (iv) Test di qualità funzionale su più CNN e più immagini. (v) Nuovi zoo/architetture con checkpoint e preprocessing indipendenti, come obiettivo della tesi magistrale 2027. Nessuno di questi controlli modifica retroattivamente le AUROC E2.
 
 ### 21. Riproducibilità: sorgenti, hash, ambiente e istruzioni di lettura
 
@@ -726,9 +726,124 @@ Questi comandi **leggono** gli artifact e ricalcolano verifiche: non eseguono nu
 
 Il programma E1→E2 ha verificato due proprietà distinte, che vanno tenute separate. **E1** dimostra che, sullo zoo GHRP/STL10 e sul protocollo few-shot adottato, il Siamese Model X-Ray discrimina campioni X-LSB X=23 non visti durante il training, con AUROC centroid media intorno a 0,90. **E2** domanda se *lo stesso tipo di detector addestrato esclusivamente su LSB* generalizzi a una diversa tecnica di incorporamento. La risposta sperimentale, **per il nostro spread additivo a 16 bit**, è negativa: l'AUROC centroid scende da **0,9043 ID** a circa **0,475–0,478 OOD α=0,24**, con **ΔAUROC −0,4267 Ubuntu e −0,4298 Mac M4**. Le dieci differenze intra-fit sono negative su entrambe le macchine, e la replicazione cross-platform conferma segno e ordine di grandezza del fenomeno.
 
-Questo esito **non dimostra** che la sola famiglia dell'attacco abbia causato il calo, che l'embedding preservi sempre la funzione delle CNN, che lo spread in generale sia invisibile, o che il risultato degli autori di Model X-Ray sia falso. Supporta una conclusione più circoscritta e difendibile: *sotto specifici vincoli di architettura, dati, intensità e capacità, un detector few-shot efficace contro X-LSB può non trasferire la capacità discriminativa a uno spread-spectrum sintetico non visto durante il training*. È proprio questa distinzione a motivare E3 e i controlli più rigorosi richiesti per una tesi o un lavoro scientifico successivo.
+Questo esito **non dimostra** che la sola famiglia dell'attacco abbia causato il calo, che l'embedding preservi sempre la funzione delle CNN, che lo spread in generale sia invisibile, o che il risultato degli autori di Model X-Ray sia falso. Supporta una conclusione più circoscritta e difendibile: *sotto specifici vincoli di architettura, dati, intensità e capacità, un detector few-shot efficace contro X-LSB può non trasferire la capacità discriminativa a uno spread-spectrum sintetico non visto durante il training*. È proprio questa distinzione a motivare E3 (Parte III) e i controlli di intensità/capacità da preregistrare per un lavoro successivo.
 
-### 23. Bibliografia e provenienza documentale
+## PARTE III — E3: controlli retrospettivi con benigni appaiati e metadati
+
+### 23. Perché E3 è necessario dopo E1 ed E2
+
+La sequenza scientifica del progetto è deliberata. **E1** misura il comportamento *in-distribution* di un detector Siamese addestrato e valutato con X-LSB, utilizzando checkpoint sorgente disgiunti. **E2** conserva l'addestramento X-LSB X=23 ma valuta lo stesso detector per fit su X-LSB (*ID*) e su due intensità di uno spread-spectrum additivo a 16 bit mai incontrato nel training (*OOD*). Su entrambe le piattaforme l'AUROC centroid passa da circa 0,904 a 0,475–0,478 per α=0,24. Il solo valore AUROC non chiarisce, però, **quali controlli rimangano invariati** e **quale classe generi gli errori**.
+
+Il piano d'esame (roadmap del 15 ottobre 2026, work package A4) indica E3 come controllo con **benigni appaiati e metadati bilanciati**. Pertanto E3 non introduce un nuovo payload, una nuova variante del Siamese o un'altra campagna di training. Rilegge, con codice indipendente dal calcolo originale delle metriche aggregate, gli **score per checkpoint già generati e auditati in E2**. I risultati E3 sono quindi **retrospettivi**, non un secondo holdout blind e non una nuova dimostrazione causale.
+
+Le domande verificabili sono quattro: (C1) benigno e modificato derivano sempre dalla stessa identità di checkpoint e sono presenti 1:1? (C2) `row_index`, `model_id` e hash della sorgente possono predire l'etichetta semplicemente identificando il checkpoint? (C3) a modello e soglia invariati, il calo OOD deriva da un cambiamento dei benigni e del FPR oppure dalla mancata rilevazione dei modificati? (C4) i controlli si ripetono con la stessa logica su Ubuntu x86 virtualizzato e su Mac M4 ARM64?
+
+### 24. Input, unità di analisi e invarianti verificati
+
+#### 24.1 Materiale sperimentale e indipendenza dei dati
+
+Il controllo legge gli artifact **ufficiali E2** dalle directory locali `e2_test_official_ubuntu_v1` ed `e2_test_official_mac_m4_v1`, in particolare le tabelle di predizione a livello di checkpoint, i manifest e le soglie registrate. Non vengono generati nuovi esempi né aggiornati pesi, embedding, seed o thresholds. Il programma è `scripts/e3_matched_controls.py`, con test unitario `tests/test_e3_controls.py`; il confronto tra piattaforme è `scripts/e3_compare_controls.py`. La versione del codice E3 è stata archiviata nel commit `e82a4d8` del branch `ricky`.
+
+Ogni fit comprende **200 checkpoint sorgente nel test E2**, tre condizioni (`LSB_ID`, `SPREAD_0.16`, `SPREAD_0.24`) e due metodi di scoring (`centroid`, `nn`). Per ciascuna combinazione **repeat × metodo × condizione × `row_index`** deve esistere una coppia di osservazioni, una con etichetta 0 (benigno) e una con etichetta 1 (modificato), con gli stessi identificatori e hash di origine. L'audit controlla anche lo split checkpoint-disjoint 600/200/200 congelato in E1.
+
+Il conto dei confronti è **10 repeat × 3 condizioni × 2 metodi × 200 sorgenti = 12.000 coppie per piattaforma**; corrispondono a 24.000 osservazioni *entro piattaforma* (un benigno e un modificato per coppia). **Non sono 12.000 checkpoint originali indipendenti:** lo stesso insieme di 200 sorgenti test viene riutilizzato nei dieci fit e nelle differenti condizioni/metodi. Il numero di record aggregati per piattaforma è 10 × 3 × 2 = **60**.
+
+#### 24.2 Controlli a esito vincolante (*fail-closed*)
+
+Il controllo rifiuta coppie mancanti o duplicate, identificatori di checkpoint diversi entro una coppia, incongruenze con lo split, label sbilanciate, punteggi non finiti e incoerenze fra gli score e le metriche registrate. La lettura dei CSV usa `float_precision='round_trip'` per conservare la semantica delle soglie float64 molto vicine a uno score: è il caso che aveva causato il falso allarme dell'audit Mac durante E2. La verifica strutturale dei benigni controlla che, *all'interno dello stesso fit e metodo*, il medesimo checkpoint benigno ottenga lo stesso score nelle tre condizioni ID/OOD. Non significa che Ubuntu e Mac producano punteggi identici bit a bit.
+
+Il campo denominato `X=23`, ereditato nello schema del runner E2, è un **campo di protocollo** presente anche nei record OOD: non implica che sui campioni spread sia stato applicato X-LSB. La famiglia effettiva è registrata da `condition` e dal manifest dei payload, ed è determinata dal ramo dell'algoritmo utilizzato nel runner.
+
+### 25. Metriche di controllo e significato dei negative controls
+
+#### 25.1 Bilanciamento e baseline costruita sui metadati
+
+A parità di identità di checkpoint (stessi `row_index`, `model_id`, SHA), si trovano **esattamente un campione benigno e uno modificato** per ogni condizione e metodo. Pertanto un predittore che assegni a ogni checkpoint la sola classe maggioritaria e utilizzi esclusivamente tali **identificatori appaiati** raggiunge per costruzione un'accuracy del **50%**. È una verifica di bilanciamento, **non** un nuovo classificatore sui metadati addestrato e validato; non esclude che altri metadati di trasformazione, serializzazione o caratteristiche delle rappresentazioni possano lasciare tracce.
+
+#### 25.2 TPR, FNR e FPR con soglia fissa
+
+Per ogni repeat e metodo, E2 aveva determinato la soglia con il criterio di Youden **esclusivamente sulla validation X-LSB**. E3 applica la stessa soglia congelata alle tre condizioni test. Con TP, FN, FP e TN calcolati sulle etichette reali:
+
+- **TPR = TP / (TP + FN):** quota di checkpoint modificati riconosciuti come modificati.
+- **FNR = FN / (TP + FN) = 1 − TPR:** quota di modificati che il detector lascia passare come benigni.
+- **FPR = FP / (FP + TN):** quota dei benigni classificati falsamente come modificati.
+
+Se gli score dei benigni restano identici e la soglia non cambia, il loro FPR deve rimanere **costante tra `LSB_ID` e `SPREAD_*`**, a parità di piattaforma, repeat e metodo. Pertanto un forte calo nel TPR a FPR invariato evidenzia che la mancata detection si concentra sui campioni modificati, senza autorizzare una spiegazione causale completa del meccanismo.
+
+#### 25.3 Concordanza appaiata distinta dall'AUROC
+
+Per ciascuna delle 200 identità sorgente, si confrontano lo score modificato e lo score benigno **dello stesso checkpoint**. La *matched concordance* è la proporzione di casi `score(modificato) > score(benigno)`, con mezzo punto per i pareggi. Un valore intorno a **0,5** indica che questo ordinamento interno alla coppia non è sistematicamente favorevole al modificato. **Non coincide con l'AUROC**, che confronta anche coppie positive/negative appartenenti a identità sorgente differenti e dipende dal ranking sull'intero insieme.
+
+### 26. Esecuzione, audit e replica indipendente Ubuntu/Mac
+
+Il test unitario su Ubuntu ha restituito `E3 CONTROLS UNIT TEST OK: 1:1 pairing, perfect metadata balance, corrupt-pair fail-closed`; il runner reale `e3_matched_controls.py` ha completato le ripetizioni **00–09** con 200 identità per ciascuno dei sei gruppi condizione/metodo, con messaggio `E3 MATCHED/METADATA CONTROLS QA OK`. Fabrizio ha eseguito il medesimo self-test e il medesimo audit sulle predizioni originali del suo Mac M4, ottenendo lo stesso messaggio di superamento. Non sono stati riavviati training del Siamese né consultate nuove riserve test.
+
+I risultati su Mac sono stati trasferiti mediante `E3_MAC_M4_RESULTS.zip`, contenente `e3_controls_per_fit.csv`, `e3_controls_summary.csv`, `e3_source_manifest.json` ed `E3_CONTROLS_REPORT.md`. Il confronto è stato eseguito da Riccardo su Ubuntu con `scripts/e3_compare_controls.py`, che verifica **60 righe per piattaforma appaiate per repeat, metodo e condizione**, coerenza degli SHA dello script E3, del runner E2 e dello split, bilanciamento, identità dei benigni e finitezza delle metriche. L'output osservato è: **`E3 CROSS-PLATFORM QA OK: 60 paired fit/method/condition records per platform`**. Il rapporto sorgente è `~/mlsec-local/runs/e3_cross_platform_v1/E3_CROSS_PLATFORM_REPORT.md`.
+
+È una replica computazionale su due hardware, **non** una replicazione su nuove architetture CNN, un nuovo zoo o un set di checkpoint indipendente. E3 non genera un nuovo numero di osservazioni scientificamente indipendenti rispetto a E2.
+
+### 27. Risultati E3: classificazione per condizione e per piattaforma
+
+#### 27.1 Risultati centroid: confronto principale
+
+| Indicatore centroid (media 10 fit) | Ubuntu ID X-LSB | Ubuntu OOD α=0,24 | Ubuntu OOD α=0,16 | Mac ID X-LSB | Mac OOD α=0,24 | Mac OOD α=0,16 |
+|---|---:|---:|---:|---:|---:|---:|
+| AUROC | 0,9043 | 0,4776 | 0,4947 | 0,9043 | 0,4745 | 0,4910 |
+| TPR, soglia Youden da validation LSB | **0,8135** | **0,1815** | 0,1740 | **0,8190** | **0,1785** | 0,1695 |
+| FNR (= 1−TPR) | 0,1865 | **0,8185** | 0,8260 | 0,1810 | **0,8215** | 0,8305 |
+| FPR, stessa soglia | **0,1820** | **0,1820** | **0,1820** | **0,1750** | **0,1750** | **0,1750** |
+| Concordanza entro coppia | 0,9265 | 0,4765 | 0,5030 | 0,9280 | 0,4800 | 0,4970 |
+
+**Lettura del risultato:** su Ubuntu il TPR centroid diminuisce di **0,6320** (63,20 punti percentuali) da X-LSB a spread α=0,24, mentre l'FPR resta **0,1820**. Sul Mac il TPR diminuisce di **0,6405** (64,05 punti), con FPR costante **0,1750**. L'FNR sullo spread principale è quindi **81,85% Ubuntu e 82,15% Mac**. Queste percentuali descrivono l'errore del detector con la soglia **già fissata**, non una soglia ottimizzata sullo spread.
+
+La concordanza appaiata centroid passa da oltre **0,92 ID** a circa **0,48 OOD**, aggiungendo un controllo basato sul confronto all'interno dello stesso checkpoint: anche evitando di confrontare benigni e modificati di checkpoint differenti, l'ordinamento degli score si perde sull'attacco OOD.
+
+#### 27.2 Risultati secondari 1-NN
+
+| Indicatore 1-NN (media 10 fit) | Ubuntu ID | Ubuntu OOD α=0,24 | Ubuntu OOD α=0,16 | Mac ID | Mac OOD α=0,24 | Mac OOD α=0,16 |
+|---|---:|---:|---:|---:|---:|---:|
+| AUROC | 0,8202 | 0,4805 | 0,4920 | 0,8167 | 0,4809 | 0,4891 |
+| TPR | 0,7275 | 0,2330 | 0,2325 | 0,7190 | 0,2430 | 0,2315 |
+| FNR | 0,2725 | 0,7670 | 0,7675 | 0,2810 | 0,7570 | 0,7685 |
+| FPR | 0,2385 | 0,2385 | 0,2385 | 0,2390 | 0,2390 | 0,2390 |
+| Concordanza entro coppia | 0,8470 | 0,4810 | 0,4895 | 0,8500 | 0,4830 | 0,4935 |
+
+Anche il metodo secondario 1-NN mostra la stessa *direzione* del fenomeno: FPR identico fra condizioni all'interno della piattaforma, forte aumento dei falsi negativi OOD e concordanza entro coppia prossima a 0,5. Il risultato primario del protocollo resta **AUROC centroid / ΔAUROC di E2**, e i controlli E3 non cambiano a posteriori questo criterio.
+
+![Controllo E3 — TPR centroid e FPR sulle due piattaforme](../results/e3_final/plots/e3_centroid_tpr_fpr.png)
+
+*Figura E3-1. Valori medi ricostruiti dai riepiloghi E3 Ubuntu/Mac comunicati nel confronto approvato. Le barre non rappresentano checkpoint indipendenti aggiuntivi.*
+
+### 28. Interpretazione: cosa si esclude e cosa resta aperto
+
+**Conclusioni supportate:** (i) l'appaiamento delle identità di checkpoint è verificato, e gli stessi identificatori non permettono una regola di classe maggioritaria migliore del 50% nel disegno 1:1; (ii) i benigni ricevono lo stesso score attraverso le tre condizioni entro il medesimo fit/metodo, quindi a soglia invariata l'FPR non varia; (iii) la perdita di AUROC OOD è coerente con un calo sostanziale di TPR e ordinamento score per i **campioni modificati**, evidenziato anche dalla concordanza matched; (iv) il risultato si ripete su Ubuntu e Mac M4.
+
+**Conclusioni non supportate:** E3 **non** addestra un classificatore generale sui metadati e **non** esclude tutte le scorciatoie da preprocessing, quantizzazione, rappresentazione o serializzazione. Non ha introdotto controlli non-steganografici *intensity-matched*. Non rende comparabili X-LSB X=23 (perturbazione relativa media osservata in G2 circa **0,313**) e spread α=0,24 / 0,16 (norma relativa circa **0,24 / 0,16**), né equipara la capacità: spread trasporta **16 bit sintetici**, mentre X-LSB altera fino a 23 bit per ciascuno dei 2.864 float32. La differenza osservata può dunque combinare famiglia, intensità, payload rate e interazione con la rappresentazione del detector: **nessuna attribuzione causale unifattoriale** è lecita.
+
+I dieci fit condividono le stesse 200 identità test. Le medie sui fit descrivono variabilità dovuta ai seed e agli esempi few-shot, non dieci dataset test indipendenti. I risultati E3 sono stati prodotti **dopo** che i risultati E2 erano stati letti: sono un audit retrospettivo verificabile, non una valutazione blind addizionale. L'insieme resta lo zoo GHRP/STL10 omogeneo da 2.864 parametri, non una verifica cross-architecture del modello bersaglio. Inoltre il nostro `SPREAD_v0` è una procedura didattica inerte ispirata ai principi dello spread-spectrum di MaleficNet, non MaleficNet originale.
+
+Per uno studio di tesi successivo si possono preregistrare su **nuovi checkpoint** controlli con perturbazione L2, numero di bit e modello bersaglio matched, cambi di architettura e procedure di preprocessing/serializzazione diverse. Sarebbero esperimenti nuovi, non estensioni retroattive del test E2 già visto. Nel progetto d'esame E3 chiude invece i controlli circoscritti richiesti dalla roadmap senza ampliare indebitamente lo scope.
+
+### 29. Riproducibilità, tracciabilità e conclusione del progetto d'esame
+
+| Artefatto | Contenuto verificabile |
+|---|---|
+| `scripts/e3_matched_controls.py` | Audit E3 su predizioni E2, coppie 1:1, identificatori, etichette, benigni e metriche a soglia. |
+| `tests/test_e3_controls.py` | Self-test sul bilanciamento e arresto su coppie corrotte. |
+| `scripts/e3_compare_controls.py` | Confronto per le 60 chiavi repeat/metodo/condizione, manifest e checksum. |
+| `docs/E3_PROTOCOL_CONTROLS.md` | Scope dei controlli E3 e limiti dell'audit retrospettivo. |
+| `~/mlsec-local/runs/e3_controls_ubuntu_v1/` | E3 Ubuntu: `e3_controls_per_fit.csv`, `e3_controls_summary.csv`, manifest e rapporto. |
+| `~/mlsec-local/runs/e3_controls_mac_m4_v1/` | Copia degli stessi quattro artifact originali Mac ricevuti da Fabrizio. |
+| `~/mlsec-local/runs/e3_cross_platform_v1/` | `e3_cross_platform_per_fit.csv`, `e3_cross_platform_summary.csv`, rapporto `E3_CROSS_PLATFORM_REPORT.md` e grafico. |
+| `results/e3_final/` | Copia destinata al repository dei riepiloghi e dei risultati controllati; gli originali locali vanno conservati. |
+
+La formula sintetica del progetto è: **E1** mostra che Model X-Ray può separare una classe di embedding X-LSB aggressivo su checkpoint indipendenti dal training; **E2** rivela che tale risultato non si trasferisce automaticamente allo spread-spectrum sintetico non visto; **E3** esclude, per il test svolto, alcune spiegazioni spurie banali legate all'identità, al trattamento dei benigni e alla soglia. Il quadro è replicato su due hardware, ma non dimostra invisibilità universale o causalità della sola famiglia. Non abbiamo usato malware operativo né riaddestrato il detector dopo aver visto i risultati OOD.
+
+**Stato del lavoro sperimentale d'esame:** E1, E2 ed E3 completati secondo i rispettivi controlli documentati. La **consegna universitaria** richiede ancora la revisione editoriale di entrambi, l'eventuale relazione sintetica nella lunghezza richiesta dai docenti, la presentazione, un audit di licenze/dati distribuibili e la verifica dello scope col docente. Non si dichiara approvazione docente o valutazione finale non documentata. La tesi individuale 2027 e l'eventuale paper sono percorsi successivi e separati.
+
+---
+
+### 30. Bibliografia e provenienza documentale
 
 **Fonti scientifiche esterne (distinte dal nostro codice):**
 
@@ -737,7 +852,7 @@ Questo esito **non dimostra** che la sola famiglia dell'attacco abbia causato il
 3. D. Hitaj et al., *Do You Trust Your Model? Emerging Malware Threats in the Deep Learning Ecosystem*, arXiv:2403.03593 (2024), successiva pubblicazione in ambito IEEE TDSC. Tratta MaleficNet 2.0, **non** implementato in questo progetto.
 4. ModelZoos/ModelZooDataset, zoo di checkpoint GHRP/STL10 e codice di definizione delle CNN: `https://github.com/ModelZoos/ModelZooDataset`; distribuzione dei dati originali: `https://zenodo.org/records/6631784`.
 
-**Artifact primari interni:**
+**Artifact primari interni (E1–E3):**
 
 - `exam/E1_REPORT.md` e `exam/E1_REPORT.docx`: storia E1 conservata come documento sperimentale autonomo.
 - `docs/E2_PROTOCOL_FROZEN.md`: condizioni e stop rule del protocollo E2.
@@ -747,5 +862,8 @@ Questo esito **non dimostra** che la sola famiglia dell'attacco abbia causato il
 - `scripts/e2_g6_audit_validation_v2.py`, `docs/E2_G6_AUDIT_PARSER_AMENDMENT.md`: audit precisione CSV.
 - `scripts/e2_g7_audit_test.py`, `scripts/e2_g7_compare_platforms.py`: audit test e confronto hardware.
 - `docs/E2_G7_FINAL_RESULTS.md`, `results/e2_final/`: riepiloghi, grafici, CSV Mac e risultati Ubuntu consolidati.
+- `docs/E3_PROTOCOL_CONTROLS.md`, `scripts/e3_matched_controls.py`, `scripts/e3_compare_controls.py` e `tests/test_e3_controls.py`: protocollo e software E3, commit `e82a4d8`.
+- `~/mlsec-local/runs/e3_cross_platform_v1/`: originale confronto E3 generato sui CSV per fit delle due macchine; `results/e3_final/`: copia per il repository dei riepiloghi consegnabili.
 
-**Provenienza del presente rapporto integrato.** La Parte I conserva il contenuto sostanziale dell'E1 già documentato (con aggiornamento dei riferimenti temporali a E2). La Parte II descrive gli esperimenti E2 conclusi il 22 ottobre 2026 a partire dai sorgenti versionati, dai log delle due piattaforme, dai CSV di sintesi e dall'archivio finale `ee2dd82`. Non costituisce una nuova esecuzione sperimentale. L'accesso diretto alla versione remota corrente di `exam/E1_REPORT.md` non è stato disponibile durante la preparazione di questo aggiornamento; per evitare sostituzioni involontarie, l'originale E1 nella repository resta intatto e la relazione integrata è fornita come nuovo documento `exam/PROJECT_REPORT.*`.
+**Provenienza del presente rapporto integrato.** La Parte I conserva il contenuto sostanziale dell'E1 già documentato (con aggiornamento dei riferimenti temporali a E2). La Parte II descrive gli esperimenti E2 conclusi il 22 ottobre 2026 a partire dai sorgenti versionati, dai log delle due piattaforme, dai CSV di sintesi e dall'archivio finale `ee2dd82`. La Parte III utilizza esclusivamente i risultati E3 forniti nei log Ubuntu e nel rapporto `E3_CROSS_PLATFORM_REPORT.md` ottenuto dal confronto dei CSV originali Mac/Ubuntu; nella presente confezione non sono disponibili i 120 record per-fit originali delle due piattaforme. Le statistiche E3 sono quindi trascritte dai riepiloghi del confronto già auditato, non ricalcolate qui dai predittori grezzi. Non costituisce una nuova esecuzione sperimentale. L'accesso diretto alla versione remota corrente di `exam/E1_REPORT.md` non è stato disponibile durante la preparazione di questo aggiornamento; per evitare sostituzioni involontarie, l'originale E1 nella repository resta intatto e la relazione integrata è fornita come nuovo documento `exam/PROJECT_REPORT.*`.
+
