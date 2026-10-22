@@ -1,0 +1,31 @@
+{
+  "scope": "G3-C exploratory model utility: TRAIN checkpoint IDs, image-valset only; no detector training",
+  "original_dataset_sha256": "7afdccfe4d5418d3645e1a42f149c377cdc9088a9283cfd8288924c3a2e0b434",
+  "e1_weights_sha256": "5a03ff6349010405fd05c7c27aee746143259fdf0a000acb4c9e05cbc8dd60ad",
+  "e1_splits_sha256": "3f4236bf2b3e7a91e11dd67037c5dc3262382fd8c77ce333b49f30d6e4b93a6f",
+  "upstream_commit": "a880e332f556fc71faf8d3753931005d5d019339",
+  "source_script_hashes": {
+    "scripts/run_e1_final_v2.py": "a75aa3d844bb695a6d6155fe808394025b04c480d74d1e1b856eec5ca6f9c037",
+    "scripts/e2_synthetic_spread.py": "70d9e0c02fd26dffc7d69f3fbbdb70cd3219844200c625891797eb13ee544edd",
+    "scripts/e2_intensity_train_audit.py": "e3bb2fb669ff3aae36f2a3412fae5e9e3a8d69f4217f9833ec37735c0500e51b",
+    "scripts/e2_g3_cnn_forward_train.py": "0595e8f3b09a2bdbc8269cf63b4647db43d9ffb8acc0bd21f938c31dde37cbbe"
+  },
+  "g3_utility_script_sha256": "40a909f6f21626108badf994ee9d43896eb0496f7df337217e576236f6652d37",
+  "image_sample_seed": 2026,
+  "image_sample_indices_sha256": "30a57e0d12a75ce7499bb383f5bca109c2757214f56575a281b158ec909abb8f",
+  "image_valset_total_size": 800,
+  "image_sample_count": 256,
+  "checkpoint_ids": [
+    3,
+    4,
+    7
+  ],
+  "spread_seed": 42,
+  "spread_repeat": 0,
+  "spread_bits": 16,
+  "spread_alphas": [
+    0.16,
+    0.24
+  ],
+  "lsb_x": 23
+}

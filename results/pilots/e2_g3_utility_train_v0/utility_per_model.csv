@@ -1,0 +1,13 @@
+checkpoint_split,row_index,model_id,image_split,n_images,correct,accuracy,condition,alpha,relative_l2,payload_bit_errors
+train,3,NN_tune_trainable_3e946_00003_3_seed=4_2021-09-27_07-48-05,valset,256,91,0.35546875,benign,,0.0,
+train,3,NN_tune_trainable_3e946_00003_3_seed=4_2021-09-27_07-48-05,valset,256,60,0.234375,X_LSB_23,,0.301316603636124,
+train,3,NN_tune_trainable_3e946_00003_3_seed=4_2021-09-27_07-48-05,valset,256,86,0.3359375,SPREAD_0.16,0.16,0.1600000002183305,0
+train,3,NN_tune_trainable_3e946_00003_3_seed=4_2021-09-27_07-48-05,valset,256,84,0.328125,SPREAD_0.24,0.24,0.23999999986395196,0
+train,4,NN_tune_trainable_3e946_00004_4_seed=5_2021-09-27_07-48-05,valset,256,104,0.40625,benign,,0.0,
+train,4,NN_tune_trainable_3e946_00004_4_seed=5_2021-09-27_07-48-05,valset,256,69,0.26953125,X_LSB_23,,0.31876659398346213,
+train,4,NN_tune_trainable_3e946_00004_4_seed=5_2021-09-27_07-48-05,valset,256,102,0.3984375,SPREAD_0.16,0.16,0.16000000075187717,0
+train,4,NN_tune_trainable_3e946_00004_4_seed=5_2021-09-27_07-48-05,valset,256,79,0.30859375,SPREAD_0.24,0.24,0.24000000015213988,0
+train,7,NN_tune_trainable_3e946_00007_7_seed=8_2021-09-27_07-48-06,valset,256,91,0.35546875,benign,,0.0,
+train,7,NN_tune_trainable_3e946_00007_7_seed=8_2021-09-27_07-48-06,valset,256,71,0.27734375,X_LSB_23,,0.3164897606106412,
+train,7,NN_tune_trainable_3e946_00007_7_seed=8_2021-09-27_07-48-06,valset,256,86,0.3359375,SPREAD_0.16,0.16,0.1599999998311952,0
+train,7,NN_tune_trainable_3e946_00007_7_seed=8_2021-09-27_07-48-06,valset,256,78,0.3046875,SPREAD_0.24,0.24,0.2400000003808636,0
