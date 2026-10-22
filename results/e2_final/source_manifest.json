@@ -1,0 +1,24 @@
+{
+  "generated_on": "2026-10-22",
+  "model_run_sha256": "4719e6d947c5c5f7acba09f464ec0d2e5abf5182c642af8a063789ca217849ac",
+  "sources": {
+    "ubuntu_origin": "terminal paste of official G7 QA, summary.csv and paired_auroc_per_repeat.csv",
+    "ubuntu_paste_sha256": "5f0f6d85e6e8bb716293334897d316aff320a40ee5ad3853ee98ed733100a12f",
+    "mac_origin": "Fabrizio ZIP (original CSV exports)",
+    "mac_zip_sha256": "e6742f8dde7768acfccdf60b8217a17f02aa36fae85d9b826623d963d69696d9"
+  },
+  "source_sha256_by_path": {
+    "results/e2_final/ubuntu/summary.csv": "515de876e41057f17b5e535fe981c37fba4bb7438130d04d0dcaed2429e7b3af",
+    "results/e2_final/ubuntu/paired_auroc_per_repeat.csv": "2526729f252634047c702dde3bd120d2bfb2274a3824249f65eb9cbd0dc46284",
+    "results/e2_final/mac_m4/summary.csv": "eab3c2df04bfd2c3a85da74a4330003b55d0f866417134ce8352cc31cbf67be3",
+    "results/e2_final/mac_m4/paired_auroc_per_repeat.csv": "0f86152e14744476c047c8e2daf08c04b01f479627ba54fc14b82789d21e5e6e",
+    "results/e2_final/mac_m4/metrics_per_run.csv": "8e6748f98b3cb03b172f971d8a1e9df139352739c685345faf794cabf3937988"
+  },
+  "validation": {
+    "ubuntu_log_g7_qa_ok": true,
+    "mac_g7_qa_ok_user_reported": true,
+    "mac_metric_aggregation_recomputed": true,
+    "raw_predictions_available_in_package": false
+  },
+  "expected_test_predictions_per_platform": 24000
+}
