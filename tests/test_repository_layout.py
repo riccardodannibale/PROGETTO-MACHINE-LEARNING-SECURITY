@@ -50,7 +50,9 @@ if broken:
 for path in (".github", "REPRODUCING.md", "docs/README.md", "docs/experimental_design.md",
              "docs/results_and_limitations.md", "docs/setup.md", "report/final_report.pdf",
              "report/final_report.docx", "results/analysis", "results/validation",
-             "results/pilots", "tests/test_e2_g2_audit_helpers.py",
+             "results/pilots", "report/Relazione_Beyond_the_XRay.md",
+             "report/Relazione_Beyond_the_XRay.pdf", "report/Relazione_Beyond_the_XRay.docx",
+             "tests/test_e2_g2_audit_helpers.py",
              "tests/test_e2_g3_utility_helpers.py", "tests/test_e2_g6_csv_roundtrip.py",
              "tests/test_e2_g7_audit_helpers.py", "tests/test_e2_spread_synthetic.py", "tests/test_e3_controls.py"):
     if (ROOT / path).exists():
