@@ -1,22 +1,22 @@
-# E2 — G7 autorizzazione documentata del test ID/OOD
+# E2 test release approval (G7)
 
-**APPROVAL: E2 TEST AUTHORIZED — 22 ottobre 2026.**
+**Approval: E2 test authorized — 22 October 2026.**
 
-Questa autorizzazione costituisce un **atto separato** dal protocollo `docs/E2_PROTOCOL_FROZEN.md` per la sola validation. Non modifica il documento congelato, il suo hash o il runner `scripts/run_e2_paired_v0.py` (SHA-256 `4719e6d947c5c5f7acba09f464ec0d2e5abf5182c642af8a063789ca217849ac`).
+This approval is a separate record from the frozen validation protocol in `docs/E2_PROTOCOL_FROZEN.md`. It does not modify that file, its hash or the E2 runner (`scripts/run_e2_paired_v0.py`, SHA-256 `4719e6d947c5c5f7acba09f464ec0d2e5abf5182c642af8a063789ca217849ac`).
 
-## Evidenza della decisione
+## Evidence reviewed before release
 
-- **Ubuntu, Riccardo**: i 10 fit ufficiali LSB validation sono terminati. Audit v2 superato: 10 fit, 40 metriche, 8.000 predizioni e 2.030 payload manifest; nessuno score test esaminato. AUROC centroid media 0,88170875, SD 0,08349493.
-- **Mac M4, Fabrizio**: dopo il controllo del parser CSV round-trip, diagnostica riferita con tre mismatch del parser standard e zero mismatch del parser round-trip; audit v2 comunicato come superato: 10 fit, 40 metriche, 8.000 predizioni e 2.030 manifest. AUROC centroid riferita ~0,88183.
-- **Approvazioni**: Riccardo ha autorizzato esplicitamente il proseguimento delle attività senza richieste ripetute; Fabrizio ha espresso approvazione integrale del protocollo e, dopo l'audit Mac, ha chiesto espressamente di procedere allo sblocco ID/OOD. L'evidenza è costituita da messaggi trasmessi da Riccardo in data 22 ottobre 2026: **non è una firma digitale** e i dati Mac sono riferiti, non letti direttamente dall'autore di questo registro.
+- **Ubuntu:** the ten official LSB validation fits had completed. The v2 audit passed with 10 fits, 40 metric records, 8,000 predictions and 2,030 payload-manifest records. No test scores had been examined. Mean centroid validation AUROC was 0.88170875 (SD 0.08349493).
+- **Mac M4:** after the CSV round-trip parser check, the reported diagnostic found three mismatches with the default parser and zero with round-trip parsing. The v2 audit was reported as passed with 10 fits, 40 metric records, 8,000 predictions and 2,030 payload-manifest records. The reported mean centroid validation AUROC was approximately 0.88183.
+- **Approvals:** Riccardo approved proceeding after the Ubuntu audit. Fabrizio approved the protocol and requested the ID/OOD test release after the Mac audit. These approvals were communicated in messages on 22 October 2026; this record is not a digital signature. Mac audit evidence is reported by the operator and was not independently inspected from raw prediction files in the shared archive.
 
-## Scope irrevocabile del test
+## Fixed scope of the test
 
-1. **10 nuovi fit per piattaforma**, ciascuno su 3 checkpoint TRAIN benign + X-LSB X=23, calibrato esclusivamente sui 200 checkpoint VALIDATION in versione benign/LSB.
-2. **Per ciascun fit, lo stesso modello** valuta i 200 checkpoint TEST benign/LSB-ID e benign/spread OOD α=0,24 (primario) e α=0,16 (secondario).
-3. La **metrica primaria** è `AUROC_centroid(SPREAD_0.24) - AUROC_centroid(LSB_ID)`, calcolata appaiando per repeat le medesime 200 identità di origine.
-4. Conservare predizioni e soglie per checkpoint, registro payload, manifest, log e test di integrità. Nessun tuning dei parametri o selezione delle ripetizioni in base agli score test.
-5. **Non ripetere selettivamente** i fit completati; in caso di errore sospendere, conservare log e applicare un emendamento tracciato se indispensabile.
-6. Un test interno al medesimo zoo GHRP/STL10 già impiegato in E1: **non un holdout esterno blind** e **non MaleficNet originale**. Capacità e intensità delle due famiglie non sono matched.
+1. Run **10 new fits per platform**. Each fit trains on three benign and three X-LSB X=23 training examples and calibrates only on the 200 LSB validation identities.
+2. For each fit, use the same fitted model to score the 200 test identities under benign/LSB ID and benign/spread OOD alpha=0.24 (primary) and alpha=0.16 (secondary).
+3. The primary metric is `AUROC_centroid(SPREAD_0.24) - AUROC_centroid(LSB_ID)`, paired by repeat on the same 200 source identities.
+4. Preserve per-checkpoint predictions and thresholds, payload records, manifests, logs and integrity checks. Do not tune parameters or select repeats using test scores.
+5. Do not selectively repeat completed fits. If an error occurs, stop, preserve the log and document any required amendment.
+6. This is an internal test on the GHRP/STL10 collection already used in E1. It is not a new external blind holdout and it is not the original MaleficNet implementation. Payload capacity and perturbation magnitude are not matched.
 
-L'autorizzazione **non** pre-approva ulteriori ottimizzazioni su test, cambi di algoritmo o altri esperimenti. Ogni piattaforma produce un proprio JSON locale di abilitazione **solo dopo un nuovo audit dei dieci fit validation locali**. Il file JSON è un record machine-readable, non una firma crittografica.
+The approval does not authorize further optimization on test data, changes to the embedding method or additional experiments. Each platform must create its own local machine-readable test-release file only after passing the local ten-fit validation audit. That JSON file is an execution record, not a cryptographic signature.

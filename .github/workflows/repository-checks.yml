@@ -1,0 +1,22 @@
+name: Repository checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  published-results:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify published E2 and E3 summaries
+        run: python scripts/verify_published_results.py
+      - name: Test published-results verifier
+        run: python tests/test_verify_published_results.py
+      - name: Test E2 release guard contract
+        run: python tests/test_e2_g7_release_contract.py
