@@ -1,55 +1,56 @@
 # Beyond the X-Ray
 
 **Detecting steganographic modifications in neural network weights**  
-Machine Learning Security project by Riccardo D'Annibale and Fabrizio Mazzilli.
+Machine Learning Security project by Riccardo D’Annibale and Fabrizio Mazzilli.
 
-This project evaluates a Siamese few-shot detector inspired by Model X-Ray. It covers an in-distribution X-LSB baseline (E1), a test on a project-specific synthetic spread-spectrum embedding (E2), and a retrospective matched-control analysis (E3).
+This repository contains the E1 X-LSB baseline, the E2 synthetic spread-spectrum transfer experiment, the E3 matched-control analysis, their published results, and the source code needed to understand and audit the work.
 
-## Main results
+## Main findings
 
 | Experiment | Main result |
 |---|---|
-| **E1 — X-LSB baseline** | At X=23, centroid AUROC is 0.901863 on Ubuntu and 0.904378 on Mac M4. |
-| **E2 — Spread-spectrum test** | At alpha=0.24, centroid AUROC is 0.477620 on Ubuntu and 0.474500 on Mac M4. |
-| **E3 — Matched controls** | Benign scores and FPR remain unchanged at the fixed validation threshold; TPR falls sharply for the spread-spectrum samples. |
+| E1 — X-LSB baseline | At X=23, centroid AUROC is 0.901863 on Ubuntu and 0.904378 on Mac M4. |
+| E2 — Spread-spectrum transfer | At alpha=0.24, centroid AUROC is 0.477620 on Ubuntu and 0.474500 on Mac M4. |
+| E3 — Matched controls | Benign scores and FPR remain stable; TPR falls sharply for the tested spread-spectrum samples. |
 
-These results apply to the tested detector, checkpoint collection and embedding settings. They do not show that spread-spectrum methods are generally undetectable and are not a reproduction of MaleficNet.
+These conclusions apply to the detector, checkpoint collection and synthetic embedding settings used in this project. The custom spread-spectrum method is educational and is not the original MaleficNet implementation.
 
-## Final report
+## Complete report
 
-- [Final report (PDF)](report/final_report.pdf)
-- [Final report (Word)](report/final_report.docx)
-- [Final report (Markdown)](report/final_report.md)
+The project theory, methodology, results, interpretation, limitations, reproducibility instructions, repository map and licensing notes are consolidated in one detailed report:
+
+- [Complete project report](report/final_report.md)
 
 ## Repository map
 
 | Path | Contents |
 |---|---|
-| `report/` | Final report in PDF, DOCX and Markdown. |
-| `scripts/` | Experiment runners, audit tools, plotting and published-result verification. |
-| `tests/` | Unit and regression tests. |
-| `results/` | Published CSV summaries, figures, platform comparisons and audit records. |
+| `report/` | The single comprehensive project report. |
+| `scripts/` | Data preparation, E1/E2/E3 runners, audits and result verification. |
+| `tests/` | Essential submission and E2 protocol-gate checks. |
+| `results/` | Final E1/E2/E3 tables, paired results, figures and provenance manifests. |
 | `manifests/` | Frozen source-checkpoint split and protocol metadata. |
 | `configs/` | Pinned Ubuntu/Python dependency list. |
 | `external/ModelXRay/` | Model X-Ray upstream Git submodule at a fixed commit. |
-| `docs/` | Experimental design, setup, licensing and experiment notes. |
-| `REPRODUCING.md` | Verification and reproduction instructions. |
+| `docs/` | Only the frozen E2 protocol and the historical authorization/compatibility records required by its integrity checks. |
 
-The experiment code uses scripts rather than notebooks. The original checkpoint collection and some raw prediction files are not included; see the data and licensing notes before attempting a full rerun.
+The original checkpoint collection and some raw prediction files are not included. Read the complete report before attempting a full rerun.
 
-## Quick check
+## Quick verification
 
 ```bash
 git clone --recurse-submodules https://github.com/riccardodannibale/PROGETTO-MACHINE-LEARNING-SECURITY.git
 cd PROGETTO-MACHINE-LEARNING-SECURITY
 python3 scripts/verify_published_results.py
+python3 tests/test_verify_published_results.py
 python3 tests/test_repository_layout.py
+python3 tests/test_e2_g5_preflight.py
+python3 tests/test_e2_g7_release_contract.py
 ```
 
-A successful result check prints `PUBLISHED E2/E3 SUMMARY QA OK`. The layout test checks internal Markdown links and required experiment records. These checks do not retrain the detector or rebuild AUROC from raw predictions. See [REPRODUCING.md](REPRODUCING.md) for details.
+These checks verify the published aggregate summaries, essential repository paths and E2 protocol gates. They do not retrain the detector or rebuild AUROC from all raw predictions. There is no automatic GitHub Actions workflow in this submission branch; checks are run manually.
 
 ## Authors and license
 
-**Authors:** Riccardo D'Annibale and Fabrizio Mazzilli.
-
-The project's own code is distributed under the MIT License in [LICENSE](LICENSE). Model X-Ray and third-party data remain subject to their own terms. See [docs/data_and_licensing.md](docs/data_and_licensing.md).
+**Authors:** Riccardo D’Annibale and Fabrizio Mazzilli.  
+The project’s own code is distributed under the MIT License in [LICENSE](LICENSE). Model X-Ray and third-party data remain subject to their own terms.
