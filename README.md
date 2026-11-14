@@ -1,46 +1,63 @@
 # Beyond the X-Ray
 
 **Detecting steganographic modifications in neural network weights**  
-Machine Learning Security project by Riccardo D’Annibale (2063306) and Fabrizio Giuseppe Mazzilli (2287495).
+Machine Learning Security project by Riccardo D'Annibale and Fabrizio Giuseppe Mazzilli.
 
-This repository contains the E1 X-LSB baseline, the E2 synthetic spread-spectrum transfer experiment, the E3 matched-control analysis, their published results, and the source code needed to understand and audit the work.
+This repository studies whether a few-shot detector inspired by Model X-Ray, trained on X-LSB modifications, transfers to a second family of synthetic weight modifications. The project combines an adapted upstream baseline, a project-specific keyed spread-spectrum prototype, identity-disjoint splits and retrospective matched controls.
 
-## Main findings
+## Main results
 
-| Experiment | Main result |
-|---|---|
-| E1 — X-LSB baseline | At X=23, centroid AUROC is 0.901863 on Ubuntu and 0.904378 on Mac M4. |
-| E2 — Spread-spectrum transfer | At alpha=0.24, centroid AUROC is 0.477620 on Ubuntu and 0.474500 on Mac M4. |
-| E3 — Matched controls | Benign scores and FPR remain stable; TPR falls sharply for the tested spread-spectrum samples. |
+### E1 — X-LSB baseline
 
-These conclusions apply to the detector, checkpoint collection and synthetic embedding settings used in this project. The custom spread-spectrum method is educational and is not the original MaleficNet implementation.
+Centroid results on the held-out test set:
 
-## Complete report
+| X-LSB | Ubuntu AUROC | Ubuntu AUPRC | Mac M4 AUROC | Mac M4 AUPRC |
+|---:|---:|---:|---:|---:|
+| 1 | 0.500150 | 0.504064 | 0.500209 | 0.504417 |
+| 8 | 0.508233 | 0.509345 | 0.509388 | 0.510389 |
+| 16 | 0.501293 | 0.512234 | 0.501425 | 0.512511 |
+| **23** | **0.901863** | **0.902063** | **0.904378** | **0.904875** |
 
-The project theory, methodology, results, interpretation, limitations, reproducibility instructions, repository map and licensing notes are consolidated in one detailed report:
+At X=1, 8 and 16 the detector is near chance; X=23 is detected reliably in this checkpoint collection.
 
-- [Complete project report](report/final_report.md)
+### E2 — ID/OOD transfer
 
-## Repository map
+Centroid results, mean over ten fits:
 
-| Path | Contents |
-|---|---|
-| `report/` | The single comprehensive project report. |
-| `scripts/` | Data preparation, E1/E2/E3 runners, audits and result verification. |
-| `tests/` | Essential submission and E2 protocol-gate checks. |
-| `results/` | Final E1/E2/E3 tables, paired results, figures and provenance manifests. |
-| `manifests/` | Frozen source-checkpoint split and protocol metadata. |
-| `configs/` | Pinned Ubuntu/Python dependency list. |
-| `external/ModelXRay/` | Model X-Ray upstream Git submodule at a fixed commit. |
-| `docs/` | Only the frozen E2 protocol and the historical authorization/compatibility records required by its integrity checks. |
+| Condition | Ubuntu AUROC | Ubuntu AUPRC | Mac M4 AUROC | Mac M4 AUPRC |
+|---|---:|---:|---:|---:|
+| ID: X-LSB X=23 | 0.904273 | 0.904619 | 0.904300 | 0.904341 |
+| OOD: spread alpha=0.24 | 0.477620 | 0.492045 | 0.474500 | 0.488265 |
+| OOD: spread alpha=0.16 | 0.494701 | 0.497873 | 0.491042 | 0.496086 |
 
-The original checkpoint collection and some raw prediction files are not included. Read the complete report before attempting a full rerun.
+AUPRC values are reported as the means available in the published summaries; AUPRC per-fit standard deviations are not included in those aggregates.
+
+### E3 — matched controls
+
+The TPR falls from about 81–82% on ID to about 18% on spread alpha=0.24. The unchanged benign scores and FPR are a structural control property: the benign scores are identical by construction and the validation threshold is held fixed. This is not independent evidence of general robustness.
+
+## Scope and correct interpretation
+
+The project reuses upstream Model X-Ray Siamese/X-LSB components but adapts the experimental protocol; it is not a bit-for-bit reproduction of the paper. The official 2026 paper's reported OOD transfer concerns MaleficNet. This project instead tests `e2-keyed-orthogonal-spread-v0-educational`, a custom educational spread-spectrum encoder, not the original MaleficNet pipeline. The E2 result therefore does not contradict the paper.
+
+X-LSB parameter `X` counts modified mantissa bit positions; it is not directly comparable to the paper's embedding-rate percentages. X-LSB X=23 and spread alpha=0.16/0.24 are also not intensity- or capacity-matched, so E2 isolates neither family change nor embedding strength causally.
+
+## Report
+
+The complete Italian technical report, including theory, methods, all experiment interpretations, limitations, reproducibility and repository map, is maintained at:
+
+- [report/final_report.md](report/final_report.md)
+
+A PDF version is supplied separately as the submission report. The Markdown file is the canonical version tracked in Git.
 
 ## Quick verification
+
+Clone the submission branch with its Model X-Ray submodule:
 
 ```bash
 git clone --recurse-submodules https://github.com/riccardodannibale/PROGETTO-MACHINE-LEARNING-SECURITY.git
 cd PROGETTO-MACHINE-LEARNING-SECURITY
+
 python3 scripts/verify_published_results.py
 python3 tests/test_verify_published_results.py
 python3 tests/test_repository_layout.py
@@ -48,9 +65,41 @@ python3 tests/test_e2_g5_preflight.py
 python3 tests/test_e2_g7_release_contract.py
 ```
 
-These checks verify the published aggregate summaries, essential repository paths and E2 protocol gates. They do not retrain the detector or rebuild AUROC from all raw predictions. There is no automatic GitHub Actions workflow in this submission branch; checks are run manually.
+These checks validate the published aggregate summaries, essential repository layout and E2 integrity gates. They do **not** retrain the detector or recompute all metrics from raw predictions. There is no active GitHub Actions workflow on the submission branch; run the checks manually.
 
-## Authors and license
+## Full reproduction requirements
 
-**Authors:** Riccardo D’Annibale and Fabrizio Giuseppe Mazzilli.  
-The project’s own code is distributed under the MIT License in [LICENSE](LICENSE). Model X-Ray and third-party data remain subject to their own terms.
+A full rerun requires the original GHRP/STL10 checkpoint collection, the extracted `weights.npy`, the pinned upstream submodule, the locked Python environment and local validation/test outputs. The repository does not include the original checkpoints or `weights.npy`.
+
+The source data are available from [Zenodo record 6631784](https://zenodo.org/records/6631784). The extraction script creates a 1000 × 2864 `float32` matrix and a checkpoint manifest. Expected `weights.npy` SHA-256:
+
+```text
+5a03ff6349010405fd05c7c27aee746143259fdf0a000acb4c9e05cbc8dd60ad
+```
+
+For the frozen E1/E2 experiment runners, switch to the experimental branch `ricky` (head verified at `3ef84f73d994fc447b12bb99f265c203548480e4`). E1 test and E2 runners explicitly require that branch. The G6/G7 E2 wrappers additionally require the prescribed sequence of validation, audit and local test-release approval. Do not bypass their preflight or alter the frozen protocol. Several runner paths default to `$HOME/mlsec-local`.
+
+## Repository map
+
+| Path | Purpose |
+|---|---|
+| `scripts/` | Data preparation, E1/E2 runners, audits, E3 matched controls and result verifier (23 scripts). |
+| `results/` | Final E1/E2/E3 summaries, per-fit data, manifests and figures. |
+| `manifests/` | Frozen source-checkpoint split and protocol metadata. |
+| `tests/` | Four essential layout, result and E2 gate tests. |
+| `report/final_report.md` | Canonical technical report. |
+| `docs/` | Frozen E2 protocol, test-release notice and two historical integrity pointers. |
+| `external/ModelXRay/` | Model X-Ray upstream Git submodule at a fixed commit. |
+| `configs/` | Locked Ubuntu 24.04 / Python 3.11 dependency versions. |
+
+The `G3/G4/G5/G6/G7` names in a few filenames are internal E2 gate labels (utility pilot, protocol freeze, runner/preflight, validation audit and test release), not additional experiments.
+
+## Licences
+
+- Project-authored code: MIT, as stated in [LICENSE](LICENSE).
+- Model X-Ray upstream submodule: CC BY-NC-ND 4.0; its terms are separate from this repository's MIT licence.
+- GHRP/STL10 data on Zenodo: CC BY 4.0; retain attribution and respect third-party components' terms.
+
+## Authors
+
+Riccardo D'Annibale and Fabrizio Giuseppe Mazzilli.
