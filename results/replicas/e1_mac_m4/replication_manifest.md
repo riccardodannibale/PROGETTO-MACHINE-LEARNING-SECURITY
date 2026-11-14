@@ -19,6 +19,6 @@ This note records the provenance of the Mac M4 E1 replica. The original CSV expo
 
 The per-run CSV contains 320 records covering the 40 (repeat, X) combinations across validation and test. Reported means for accuracy, AUROC, AUPRC, F1 and FPR were recomputed from the CSV and matched the summary within numerical tolerance. The original operator reported that validation and test each completed 40/40 fits and that the experiment files matched the Ubuntu runner.
 
-The compact submission retains the summary, per-run metrics and source digests, but omits the original log and detailed machine-local audit bundle. Those omitted records are not required to read the final results; the provenance limits are described in the [complete report](../../report/final_report.md).
+The compact submission retains the summary, per-run metrics and source digests, but omits the original log and detailed machine-local audit bundle. Those omitted records are not required to read the final results; the provenance limits are described in the [complete report](../../../report/final_report.md).
 
 Mean test runtime was reported as about 100–110 seconds per fit, with no out-of-memory failures. These timings are operational notes, not a controlled hardware benchmark. The platform comparison is not a test on a different CNN architecture and does not establish statistical equivalence.
