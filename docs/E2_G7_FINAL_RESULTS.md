@@ -1,7 +1,7 @@
 # E2 — Chiusura dei risultati ID/OOD e confronto hardware
 
 **Progetto Machine Learning Security — “Beyond the X-Ray”**  
-**Data:** 22 ottobre 2026 · **Fase:** progetto universitario (dicembre 2026), base per eventuale tesi magistrale 2027.  
+**Data:** 22 ottobre 2026 · **Fase:** progetto universitario (dicembre 2026).  
 **Stato:** le due campagne test sono completate; audit G7 Ubuntu dichiarato OK nel log e audit G7 Mac dichiarato OK da Fabrizio. Confronto statistico dei CSV verificato. Questo report non è una nuova replica di MaleficNet né un test esterno indipendente.
 
 ## 1. Domanda sperimentale e protocollo
