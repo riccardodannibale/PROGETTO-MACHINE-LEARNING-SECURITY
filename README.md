@@ -73,11 +73,46 @@ A full rerun requires the original GHRP/STL10 checkpoint collection, the extract
 
 The source data are available from [Zenodo record 6631784](https://zenodo.org/records/6631784). The extraction script creates a 1000 × 2864 `float32` matrix and a checkpoint manifest. Expected `weights.npy` SHA-256:
 
+Prepare the environment and rebuild the matrix outside the Git repository:
+
+```bash
+./scripts/setup_linux.sh
+./scripts/check_setup.sh
+export MODELXRAY_GHRP_DIR="$HOME/mlsec-local/datasets/ghrp_zoos"
+bash scripts/download_d1_stl10.sh --all
+INPUT_ROOT="$(find "$MODELXRAY_GHRP_DIR" -type d -name tune_zoo_stl_small_uniform -print -quit)"
+test -n "$INPUT_ROOT"
+python3 scripts/extract_d1_real_weights.py \
+  --input-root "$INPUT_ROOT" \
+  --output-dir "$MODELXRAY_GHRP_DIR/d1_uniform_real" \
+  --expected-models 1000
+```
+
+
 ```text
 5a03ff6349010405fd05c7c27aee746143259fdf0a000acb4c9e05cbc8dd60ad
 ```
 
 For the frozen E1/E2 experiment runners, switch to the experimental branch `ricky` (head verified at `3ef84f73d994fc447b12bb99f265c203548480e4`). E1 test and E2 runners explicitly require that branch. The G6/G7 E2 wrappers additionally require the prescribed sequence of validation, audit and local test-release approval. Do not bypass their preflight or alter the frozen protocol. Several runner paths default to `$HOME/mlsec-local`.
+
+E1 validation can then be reproduced using the same default local paths:
+
+```bash
+git switch ricky
+export MODELXRAY_PYTHON="$HOME/mlsec-local/venvs/modelxray/bin/python"
+export MODELXRAY_GHRP_DIR="$HOME/mlsec-local/datasets/ghrp_zoos"
+export E1_V2_OUT_DIR="$HOME/mlsec-local/runs/e1_v2_validation"
+bash scripts/run_e1_v2_matrix.sh
+```
+
+The E1 test wrapper requires a successful preflight and an explicit unblind confirmation; its validation and test directories are fixed under `$HOME/mlsec-local/runs/`:
+
+```bash
+bash scripts/run_e1_v2_test_matrix.sh --preflight
+E1_TEST_UNBLIND_CONFIRM=UNBLIND_E1_V2_TEST bash scripts/run_e1_v2_test_matrix.sh --run
+```
+
+E2 has a separate, gated lifecycle: run `bash scripts/e2_g6_run_validation.sh`, audit the ten validation fits with `e2_g6_audit_validation_v2.py`, create the platform-specific local authorization using `e2_g7_prepare_test_release.py`, then run `bash scripts/e2_g7_run_test.sh` and audit with `e2_g7_audit_test.py`. For Ubuntu the standard validation/test/approval paths are under `$HOME/mlsec-local/runs/e2_validation_official_v1`, `e2_test_official_ubuntu_v1` and `e2_test_release_ubuntu_v1.json`. The Mac wrapper uses corresponding `mac_m4` paths. E2 wrappers intentionally stop if hashes, branch, output directories or approval do not match.
 
 ## Repository map
 
