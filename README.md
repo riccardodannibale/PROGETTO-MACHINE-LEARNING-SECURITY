@@ -1,7 +1,7 @@
 # Beyond the X-Ray
 
 **Detecting steganographic modifications in neural network weights**  
-Machine Learning Security project by Riccardo D’Annibale and Fabrizio Mazzilli.
+Machine Learning Security project by Riccardo D’Annibale (2063306) and Fabrizio Giuseppe Mazzilli (2287495).
 
 This repository contains the E1 X-LSB baseline, the E2 synthetic spread-spectrum transfer experiment, the E3 matched-control analysis, their published results, and the source code needed to understand and audit the work.
 
