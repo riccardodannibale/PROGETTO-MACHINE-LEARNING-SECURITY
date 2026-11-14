@@ -521,7 +521,7 @@ La versione ripulita è organizzata per separare documentazione completa, codice
 | `results/e2_final/` | Tabelle E2, AUROC appaiate, statistiche cross-platform, manifest e grafici. |
 | `results/e3_final/` | Tabelle E3 per fit, riepiloghi, confronti tra piattaforme e grafico. |
 | `results/figures/e1/` | Figure E1 selezionate, non l'intero archivio esplorativo. |
-| `report/final_report.md` | Versione Markdown sintetica mantenuta nella repository. Questa relazione PDF/DOCX è un’edizione estesa con istruzioni operative e mappa dei file più dettagliate; risultati e conclusioni scientifiche restano coerenti. |
+| `report/final_report.md` | Sorgente Markdown canonico e completo della relazione scientifica; le istruzioni operative e i registri sono raccolti nelle appendici. |
 | `docs/` | Quattro registri E2: protocollo congelato, avviso di autorizzazione al test e due puntatori storici richiesti dai controlli di integrità. Non sono manuali duplicati. |
 
 ## B.1 File di risultati da consultare
