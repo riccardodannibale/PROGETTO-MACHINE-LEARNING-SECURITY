@@ -4,9 +4,17 @@
 **Progetto di Machine Learning Security**  
 **Autori:** Riccardo D'Annibale e Fabrizio Mazzilli  
 **Esperimenti:** E1, E2, E3  
-**Versione di riferimento:** branch `main`, stato precedente alla pulizia finale: `33edfb9aaca05fd3668896aaf1db139d81240ae2`.
+**Versione di consegna:** branch `main`. I runner sperimentali E1/E2 richiedono il branch `ricky`, il cui head verificato al 14 novembre 2026 è `3ef84f73d994fc447b12bb99f265c203548480e4`. I file E1/E2 congelati risultano identici nei due branch; il vincolo sul branch è applicato dai runner per proteggere la provenienza degli esperimenti.
 
 ---
+
+## Valutazione sintetica
+
+Il progetto risponde alla domanda concordata nella proposta iniziale: valutare un detector few-shot ispirato a Model X-Ray con split disgiunto per identità dei checkpoint e misurare il trasferimento da una modifica X-LSB a una seconda famiglia di embedding. Per andare oltre la sola replica, il lavoro introduce un encoder spread-spectrum keyed e didattico, un protocollo ID/OOD appaiato e controlli retrospettivi sui campioni benigni e sui metadati. Questo costituisce un contributo progettuale concreto, ma non va presentato come una nuova implementazione di MaleficNet né come una replica integrale del paper Model X-Ray.
+
+E1 rileva la condizione X-LSB X=23 con AUROC circa 0,90, mentre X=1, 8 e 16 restano vicini al caso. E2 mostra che lo stesso detector non trasferisce il ranking alla specifica implementazione spread-spectrum provata: le AUROC OOD sono circa 0,47-0,49, cioè **al livello del caso entro la variabilità osservata**. E3 supporta l'interpretazione di una perdita di TPR sui campioni modificati, ma la stabilità della FPR è un controllo strutturale atteso, non una scoperta indipendente.
+
+Il risultato è una base valida per un progetto magistrale e per avviare una tesi, non una tesi già completa: servono almeno intensità e capacità di payload appaiate, più architetture, un holdout realmente esterno e un confronto con un'implementazione MaleficNet autentica o con ulteriori famiglie di attacco.
 
 ## Come leggere questa relazione
 
@@ -63,7 +71,15 @@ L'approccio è **few-shot learning** perché utilizza pochissimi esempi per impa
 
 Il punteggio principale usa la distanza dai centroidi (*centroid distance*): si calcola un centro delle rappresentazioni benigne e uno delle rappresentazioni modificate, poi si confrontano le distanze del campione da entrambi. Il margine è definito come distanza dal centro benigno meno distanza dal centro stego; valori più alti favoriscono la classe modificata. Come metodo secondario viene usato 1-NN (*one-nearest-neighbor*), che confronta il campione con l'esempio di training più vicino.
 
-## 1.6 Metriche: come interpretare i numeri
+## 1.6 Relazione con il paper Model X-Ray e perimetro della replica
+
+Il paper Model X-Ray pubblicato nel 2026 descrive la rappresentazione Grayscale-Fourpart (GF), una rete few-shot e una valutazione che include attacchi X-LSB e trasferimento OOD verso MaleficNet. Il repository upstream contiene inoltre una matrice di baseline e altre pipeline di valutazione. Il presente progetto riutilizza componenti upstream del detector Siamese e della pipeline X-LSB, ma adotta un protocollo sperimentale adattato: split congelato per identità sorgente, dieci fit, tre identità di training per fit, payload sintetici deterministici e metriche/controlli aggiuntivi. Il runner E1 stesso dichiara che non si tratta di una riproduzione bit-per-bit dello split 3+3 del paper.
+
+È essenziale non confrontare direttamente i valori X=1, 8, 16 e 23 con le percentuali di *embedding rate* riportate nel paper: X indica quanti bit meno significativi della mantissa vengono modificati, mentre l'embedding rate è una diversa quantità sperimentale. Di conseguenza, il risultato E1 non conferma né smentisce le percentuali di rilevamento pubblicate nel paper.
+
+Anche il confronto OOD è diverso. Il paper valuta il trasferimento verso MaleficNet; E2 valuta `e2-keyed-orthogonal-spread-v0-educational`, un encoder sviluppato per questo progetto e ispirato allo spread-spectrum, ma privo della pipeline originale MaleficNet. Il risultato E2 non contraddice quindi il trasferimento OOD riportato dal paper: riguarda un encoder, una capacità di payload, un'intensità e un protocollo differenti. La formulazione corretta è che il detector non trasferisce il ranking alla specifica variante didattica qui testata.
+
+## 1.7 Metriche: come interpretare i numeri
 
 | Metrica | Significato |
 |---|---|
@@ -121,14 +137,16 @@ E1 v2 è il protocollo finale in-distribution del progetto. Gli output esplorati
 
 AUROC medio del metodo centroid sul test:
 
-| X-LSB | Ubuntu | Mac M4 |
-|---:|---:|---:|
-| 1 | 0.500150 | 0.500209 |
-| 8 | 0.508233 | 0.509388 |
-| 16 | 0.501293 | 0.501425 |
-| **23** | **0.901863** | **0.904378** |
+| X-LSB | Ubuntu AUROC | Ubuntu AUPRC (media ± SD) | Mac M4 AUROC | Mac M4 AUPRC (media ± SD) |
+|---:|---:|---:|---:|---:|
+| 1 | 0.500150 | 0.504064 ± 0.001444 | 0.500209 | 0.504417 ± 0.001155 |
+| 8 | 0.508233 | 0.509345 ± 0.025420 | 0.509388 | 0.510389 ± 0.025776 |
+| 16 | 0.501293 | 0.512234 ± 0.021902 | 0.501425 | 0.512511 ± 0.023323 |
+| **23** | **0.901863** | **0.902063 ± 0.069213** | **0.904378** | **0.904875 ± 0.065256** |
 
-A X=1, 8 e 16 l'AUROC rimane vicino a 0,5: il ranking non è utile nelle condizioni provate. A X=23 il rilevatore raggiunge circa 0,90 su entrambe le piattaforme, indicando una buona capacità di distinguere i campioni X-LSB modificati nella collezione studiata.
+L'AUPRC è calcolata sui punteggi continui e non dipende dalla soglia binaria; la deviazione standard è quella campionaria tra i dieci fit. Il test contiene 200 esempi benigni e 200 modificati, quindi il riferimento casuale dell'AUPRC è circa 0,50.
+
+A X=1, 8 e 16 AUROC e AUPRC rimangono vicine al caso: in queste condizioni il rilevatore non ordina in modo utile i campioni benigni e modificati. A X=23 entrambe le metriche salgono a circa 0,90, indicando una buona capacità di distinguere le due classi nella collezione studiata.
 
 Con la soglia Youden scelta sulla validation, l'accuracy media a X=23 è 0.82125 su Ubuntu e 0.82300 su Mac M4. I corrispondenti FPR sono 0.1550 e 0.1605. Il metodo 1-NN è secondario e ottiene AUROC 0.815734 su Ubuntu e 0.819226 su Mac M4 a X=23.
 
@@ -155,16 +173,17 @@ Il protocollo E2 prevede controlli fail-closed: hash del runner, hash dello spli
 
 ## 4.2 Risultati centroid
 
-| Condizione | Ubuntu: media ± SD | Mac M4: media ± SD |
-|---|---:|---:|
-| ID: X-LSB X=23 | 0.904273 ± 0.063014 | 0.904300 ± 0.059861 |
-| OOD: spread alpha=0.24 | 0.477620 ± 0.039926 | 0.474500 ± 0.037686 |
-| OOD: spread alpha=0.16 | 0.494701 ± 0.024164 | 0.491042 ± 0.022405 |
-| **Delta alpha=0.24 − ID** | **−0.426653 ± 0.085535** | **−0.429800 ± 0.084764** |
+| Condizione | Ubuntu AUROC (media ± SD) | Ubuntu AUPRC (media) | Mac M4 AUROC (media ± SD) | Mac M4 AUPRC (media) |
+|---|---:|---:|---:|---:|
+| ID: X-LSB X=23 | **0.904273 ± 0.063014** | **0.904619** | **0.904300 ± 0.059861** | **0.904341** |
+| OOD: spread alpha=0.24 | 0.477620 ± 0.039926 | 0.492045 | 0.474500 ± 0.037686 | 0.488265 |
+| OOD: spread alpha=0.16 | 0.494701 ± 0.024164 | 0.497873 | 0.491042 ± 0.022405 | 0.496086 |
+
+Gli aggregati ufficiali pubblicano l'AUPRC media ma non la sua deviazione standard per fit; per questo non viene inventata una SD AUPRC. Anche qui la prevalenza delle classi è bilanciata e l'AUPRC casuale è circa 0,50.
 
 La differenza primaria è negativa in tutti e dieci i fit su entrambe le piattaforme. Il metodo 1-NN mostra lo stesso andamento generale: AUROC ID pari a 0.820174 su Ubuntu e 0.816670 su Mac M4; a alpha=0.24 scende rispettivamente a 0.480515 e 0.480939.
 
-Il calo da circa 0,90 a valori vicini a 0,5 indica che il detector addestrato su X-LSB non trasferisce il proprio ranking alla specifica implementazione spread-spectrum sintetica valutata. Non significa che il detector sia generalmente inutile: E1 mostra che sa riconoscere la condizione su cui è stato addestrato.
+Il detector mantiene un AUROC vicino a 0,90 sulla condizione ID X-LSB, ma scende a 0,475-0,495 sulle condizioni spread-spectrum. Questi valori sono **compatibili con prestazioni al livello del caso** entro la variabilità tra fit: non sono sufficienti per sostenere un ranking inverso affidabile. Il risultato indica che la rappresentazione appresa usando X-LSB non si trasferisce alla particolare famiglia di modifica sintetica testata. Non significa che il detector sia generalmente inutile: E1 mostra che riconosce la condizione su cui è stato addestrato.
 
 ## 4.3 Confronto tra piattaforme
 
@@ -209,27 +228,27 @@ E3 è un'analisi retrospettiva dei punteggi del test E2. Non addestra un nuovo d
 | FPR | 0.1820 | 0.1820 | 0.1750 | 0.1750 |
 | Concordanza appaiata | 0.9265 | 0.4765 | 0.9280 | 0.4800 |
 
-La TPR cala nettamente: su Ubuntu passa da circa 81% a 18%, e su Mac da circa 82% a 18%. La FPR rimane costante all'interno della piattaforma perché i punteggi benigni sono invariati e viene mantenuta la stessa soglia di validation. La FNR cresce in modo corrispondente.
+La TPR cala nettamente: su Ubuntu passa da circa 81% a 18%, e su Mac da circa 82% a 18%. La FNR cresce in modo corrispondente.
+
+La **FPR identica tra ID e OOD non è un risultato indipendente**: il codice di controllo verifica che i punteggi benigni siano esattamente gli stessi tra condizioni (`max_benign_score_difference = 0`) e mantiene la medesima soglia di validation per ogni fit. La FPR invariata è quindi una conseguenza strutturale attesa e va interpretata come controllo di coerenza del pairing, non come prova autonoma di robustezza.
 
 Il baseline di accuratezza maggioritaria basato soltanto sui metadati è 50% per costruzione, perché ogni checkpoint sorgente contribuisce con un campione benigno e uno modificato. Questo riduce una possibile scorciatoia basata sui metadati controllati, ma non esclude ogni possibile shortcut in preprocessing, serializzazione o rappresentazione.
 
-**Conclusione E3:** i controlli indicano che il peggioramento E2 è associato soprattutto alla perdita di TPR sui campioni modificati, non a un cambiamento del comportamento sui campioni benigni o della FPR alla soglia fissata. E3 resta un'analisi post-hoc, non un test indipendente.
+La parte informativa di E3 è la caduta della TPR, l'aumento complementare della FNR e la bassa concordanza appaiata per i campioni spread. E3 resta un'analisi post-hoc sui medesimi risultati E2, non un nuovo holdout indipendente.
 
 # 6. Conclusioni generali
 
-I tre esperimenti raccontano una storia coerente:
-1. E1 mostra che il detector few-shot distingue bene la condizione X-LSB X=23 nella collezione studiata.
-2. E2 mostra che lo stesso detector non conserva tale capacità di ranking sulla specifica tecnica spread-spectrum sintetica non vista in training e validation.
-3. E3 mostra che il calo di TPR si verifica mantenendo stabili i punteggi benigni e la FPR alla soglia fissata.
+I tre esperimenti raccontano una storia coerente: E1 rileva la condizione X-LSB X=23; E2 mostra che la capacità ID non si trasferisce alla specifica tecnica spread-spectrum sintetica provata; E3 documenta la caduta della TPR, mentre la FPR invariata è un controllo strutturale atteso e non un risultato autonomo.
 
-Il contributo principale è documentare sperimentalmente un limite di trasferimento tra famiglie di modifica dei pesi per un detector addestrato su una sola famiglia. Non viene dimostrato che tutte le tecniche spread-spectrum siano invisibili, che il vero MaleficNet sia stato replicato, che tutte le CNN mantengano la propria utilità dopo l'embedding o che Model X-Ray non funzioni in generale.
+Il contributo principale è la combinazione di un encoder spread-spectrum keyed, sviluppato come prototipo didattico, e di un protocollo paired ID/OOD con controlli. La rivendicazione corretta è un contributo sperimentale e metodologico per il progetto, non una nuova implementazione di MaleficNet né una superiorità rispetto al paper. Il lavoro è una base sensata per una possibile tesi magistrale, ma non una tesi già completa. Una tesi dovrebbe aggiungere intensità L2 e capacità di payload appaiate, la vera pipeline MaleficNet, più architetture e collezioni indipendenti, un holdout esterno, metriche di utilità su più task e ulteriori controlli/attacchi.
 
 # 7. Limiti dello studio
 
 - **Una sola collezione di checkpoint:** non è stata dimostrata la generalizzazione a molte architetture o a zoo indipendenti.
 - **Identità di test riutilizzate:** le dieci ripetizioni condividono gli stessi 200 checkpoint test e non sono dieci holdout indipendenti.
 - **Intensità e payload non pareggiati:** X-LSB X=23 e spread alpha=0.24/0.16 differiscono per perturbazione relativa e capacità.
-- **E3 retrospettivo:** analizza punteggi E2 già osservati, non crea un nuovo test blind.
+- **E3 retrospettivo:** analizza punteggi E2 già osservati, non crea un nuovo test blind. La FPR stabile è attesa per costruzione perché gli score benigni non cambiano; non è evidenza autonoma.
+- **AUROC OOD:** le medie inferiori a 0,50 sono accompagnate da variabilità tra fit e da intervalli descrittivi che attraversano 0,50; la conclusione prudente è “al livello del caso”, non “ranking invertito”.
 - **Payload sintetici e inerti:** non viene testato malware eseguibile o un attacco operativo.
 - **Pilot di utility limitato:** solo tre CNN e 256 immagini per condizione.
 - **Artefatti non completi:** i checkpoint originali e alcuni file grezzi di prediction/intermedi non sono redistribuiti nella repository.
@@ -247,7 +266,7 @@ Per un futuro lavoro esteso, sarebbe opportuno utilizzare checkpoint provenienti
 2. **Audit degli output originali:** richiede i file di prediction, log e configurazioni locali conservati sulle macchine sperimentali.
 3. **Riesecuzione completa:** richiede dataset, checkpoint originali, ambiente compatibile, codice upstream e protocolli congelati.
 
-Il passaggio 1 non implica che siano stati ripetuti training e test. Il progetto mantiene pubblicati i risultati e alcuni audit, ma non include tutti i checkpoint e gli output grezzi.
+Il passaggio 1 non implica che siano stati ripetuti training e test. Il progetto mantiene pubblicati i risultati e alcuni audit, ma non include tutti i checkpoint e gli output grezzi. La finalizzazione documentale non equivale a un nuovo run dei quattro test essenziali né a un nuovo training.
 
 ## 8.2 Verifiche leggere su una nuova copia
 
@@ -273,7 +292,7 @@ python3 tests/test_e2_g5_preflight.py
 python3 tests/test_e2_g7_release_contract.py
 ```
 
-Questi controlli non addestrano il detector, non caricano i checkpoint originali e non ricostruiscono l'AUROC da tutte le prediction grezze. Dopo la rimozione della workflow CI, vanno eseguiti manualmente.
+Questi controlli non addestrano il detector, non caricano i checkpoint originali e non ricostruiscono l'AUROC da tutte le prediction grezze. La repository non contiene una workflow GitHub Actions attiva: i quattro test vanno eseguiti manualmente. I test presenti sono `test_e2_g5_preflight.py`, `test_e2_g7_release_contract.py`, `test_repository_layout.py` e `test_verify_published_results.py`.
 
 ## 8.3 Ambiente e riesecuzione completa
 
@@ -287,14 +306,16 @@ Per una riesecuzione completa servono:
 - le dipendenze compatibili;
 - gli input validation/test e gli output locali richiesti dai runner.
 
-Il file `dataset.pt` contiene immagini/etichette STL10 pre-elaborate; `weights.npy` contiene invece i parametri estratti dalle CNN. Sono artefatti differenti. La repository non include la collezione originale completa né tutti i file intermedi. I dati devono essere ottenuti dalla fonte originale e utilizzati nel rispetto delle relative condizioni di licenza.
+Il file `dataset.pt` contiene immagini/etichette STL10 pre-elaborate; `weights.npy` contiene invece i parametri estratti dalle CNN. Sono artefatti differenti.
+
+La repository non include `weights.npy` (shape attesa 1000×2864 `float32`, circa 10,92 MiB). Per ricostruirlo, usare `download_d1_stl10.sh`, individuare la directory estratta `tune_zoo_stl_small_uniform/` e invocare `extract_d1_real_weights.py --input-root ... --output-dir ... --expected-models 1000`. La matrice deve avere SHA-256 `5a03ff6349010405fd05c7c27aee746143259fdf0a000acb4c9e05cbc8dd60ad`. La repository non include la collezione originale completa né tutti i file intermedi. I dati devono essere ottenuti dalla fonte originale e utilizzati nel rispetto delle relative condizioni di licenza.
 
 Le entry point principali sono:
 - E1: `scripts/run_e1_final_v2.py`, `scripts/run_e1_v2_matrix.sh`, `scripts/run_e1_v2_test_matrix.sh`;
 - E2: `scripts/run_e2_paired_v0.py`, con audit G6/G7 e il metodo `scripts/e2_synthetic_spread.py`;
 - E3: `scripts/e3_matched_controls.py` e `scripts/e3_compare_controls.py`.
 
-I runner storici E2 includono verifiche di hash e percorsi congelati. Non spostare o modificare `docs/E2_PROTOCOL_FROZEN.md`, `docs/E2_G7_TEST_RELEASE_NOTICE.md` o i file sorgente richiamati senza una revisione formale e una nuova registrazione del protocollo. Non sovrascrivere gli output ufficiali e non rilanciare selettivamente i fit completati per migliorare il risultato.
+I runner E2 includono verifiche di hash, percorsi locali predefiniti sotto `$HOME/mlsec-local` e una distinta autorizzazione al test. Non spostare o modificare `docs/E2_PROTOCOL_FROZEN.md`, `docs/E2_G7_TEST_RELEASE_NOTICE.md` o i file sorgente richiamati senza una revisione formale e una nuova registrazione del protocollo. Non sovrascrivere gli output ufficiali e non rilanciare selettivamente i fit completati per migliorare il risultato.
 
 # 9. Mappa dei file essenziali
 
@@ -330,25 +351,25 @@ I runner storici E2 includono verifiche di hash e percorsi congelati. Non sposta
 - E2: `summary.csv`, AUROC appaiati per ripetizione, statistiche cross-platform, source manifest e tre plot ID/OOD.
 - E3: riepiloghi e risultati per fit Ubuntu/Mac, tabelle cross-platform e grafico TPR/FPR.
 
-I log diagnostici ad hoc, i risultati intermedi di validation non necessari alla sintesi finale, i pilot di sviluppo e le figure duplicate non sono inclusi nella versione di consegna ripulita. I numeri essenziali del pilot sono riportati nella sezione E2.
+I log diagnostici ad hoc, i risultati intermedi di validation non necessari alla sintesi finale, i pilot di sviluppo e le figure duplicate non fanno parte dell'albero `main`. I numeri essenziali del pilot sono riportati nella sezione E2.
 
-# 10. Pulizia della consegna
+# 10. Convenzioni dei registri E2
 
-La pulizia è stata effettuata per rendere la repository leggibile senza cancellare le prove principali:
-- la workflow `.github/` è stata rimossa su richiesta; non sono quindi più eseguiti controlli GitHub Actions automatici a ogni push/pull request;
-- le guide e le note descrittive separate sono state integrate in questa relazione;
-- `REPRODUCING.md` e le copie PDF/DOCX parallele sono state rimosse dal repository per mantenere un solo report canonico in Markdown;
-- sono stati rimossi output esplorativi, audit di sviluppo ridondanti, diagnostiche puntuali, grafici duplicati e test helper non necessari alla consegna;
-- sono stati conservati i risultati finali per fit e aggregati, i manifest, gli script essenziali e i test di verifica della consegna;
-- la cartella `docs/` è stata ridotta ai registri E2 che il runner verifica e alle note storiche citate dal protocollo congelato.
+Le sigle G3, G4, G5, G6 e G7 sono etichette interne dei gate E2, non esperimenti scientifici distinti da E1, E2 ed E3: G3 identifica il pilot di utilità; G4 il protocollo congelato; G5 il runner e il preflight; G6 l'audit della validation; G7 l'autorizzazione e l'audit del test.
 
-La rimozione della workflow non elimina la possibilità di verificare il progetto: significa soltanto che i controlli elencati nella sezione precedente devono essere avviati manualmente.
+I quattro file in `docs/` sono mantenuti perché i runner e i test verificano contenuto, percorso o hash di alcuni di essi. In particolare `docs/E2_PROTOCOL_FROZEN.md` ha hash Git blob `696854c0669964bc92033034af90ec84443d20c3` ed è immutabile nell'ambito dei risultati pubblicati. `E2_G3_UTILITY_RESULTS.md` e `E2_PROTOCOL_FINAL_REVIEW.md` sono puntatori storici richiamati dal protocollo, non manuali duplicati.
+
+La repository non contiene una workflow GitHub Actions attiva: i quattro test essenziali vanno eseguiti manualmente.
 
 # 11. Licenze e componenti di terze parti
 
-Il codice originale del progetto è distribuito secondo la licenza MIT riportata nel file `LICENSE`. Questa licenza non sostituisce né modifica i termini dei componenti esterni.
+Il codice originale scritto per questo progetto è distribuito sotto licenza **MIT**, riportata in `LICENSE`. La licenza del codice del progetto non si estende automaticamente ai componenti esterni.
 
-Model X-Ray è un progetto di terze parti collegato tramite submodule e mantiene la propria licenza e i propri obblighi di attribuzione. La collezione GHRP/STL10 è distribuita dalla fonte originale indicata nel record Zenodo 6631784: prima di redistribuire checkpoint, immagini, pesi o derivati, occorre verificare i termini applicabili. La repository pubblica non include i checkpoint originali completi.
+Il submodule Model X-Ray, fissato al commit `a880e332f556fc71faf8d3753931005d5d019339`, dichiara una licenza **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)**. Occorre rispettarne attribuzione, limitazione non commerciale e condizioni sulle opere derivate; la licenza MIT del repository principale non modifica quei termini.
+
+Il record Zenodo 6631784 della collezione GHRP/STL10 dichiara **Creative Commons Attribution 4.0 International (CC BY 4.0)**. La collezione può essere consultata e riutilizzata secondo tale licenza, con attribuzione alla fonte e rispetto degli eventuali termini di altri componenti inclusi.
+
+La repository non contiene gli archivi originali né `weights.npy`. Quest'ultimo, se ricostruito correttamente, ha dimensione attesa di circa 10,92 MiB (1000 × 2864 valori `float32`) ed è piccolo abbastanza da poter essere pubblicato in una release dedicata, con manifest e attribuzione. Non viene incluso perché non è disponibile nell'ambiente di finalizzazione e non sarebbe corretto ricrearlo o dichiararne l'hash senza averlo verificato.
 
 # 12. Glossario
 
@@ -372,6 +393,7 @@ Model X-Ray è un progetto di terze parti collegato tramite submodule e mantiene
 1. D. Gilkarov e R. Dubin, *Model X-Ray: Detection of Hidden Malware in AI Model Weights Using Few Shot Learning*, arXiv:2409.19310 (2024); versione journal in *Journal of Information Security and Applications* (2026), DOI: 10.1016/j.jisa.2026.104517. Codice: https://github.com/danigil/ModelXRay.
 2. D. Hitaj et al., *MaleficNet: Hiding Malware into Deep Neural Networks Using Spread-Spectrum Channel Coding*, ESORICS 2022, DOI: 10.1007/978-3-031-17143-7_21.
 3. D. Hitaj et al., *Do You Trust Your Model? Emerging Malware Threats in the Deep Learning Ecosystem*, arXiv:2403.03593 (2024).
-4. Collezione GHRP/STL10, record Zenodo 6631784: https://zenodo.org/records/6631784.
+4. Collezione GHRP/STL10, record Zenodo 6631784, licenza CC BY 4.0: https://zenodo.org/records/6631784.
+5. Repository upstream Model X-Ray, licenza CC BY-NC-ND 4.0: https://github.com/danigil/ModelXRay.
 
 **Ambito:** progetto universitario di ricerca. I risultati vanno interpretati esclusivamente entro le condizioni sperimentali e i limiti esplicitati in questa relazione.
