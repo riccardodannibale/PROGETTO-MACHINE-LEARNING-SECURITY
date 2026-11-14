@@ -1,39 +1,24 @@
-# Third-party content, data policy and licensing review
+# Third-party content and data policy
 
-**Status: review checklist, not legal advice or confirmation of distribution rights.**
+## Licensing
 
-## Why this matters
+- **Project code and documents** (`scripts/`, `tests/`, `docs/`, `report/`, result tables and figures) are released under the MIT license in [`LICENSE`](../LICENSE).
+- **Model X-Ray** ([`danigil/ModelXRay`](https://github.com/danigil/ModelXRay)) is included only as a pinned Git submodule (`external/ModelXRay`, commit `a880e332f556fc71faf8d3753931005d5d019339`). Upstream declares **CC BY-NC-ND 4.0** and mentions a patent application. The MIT license of this repository does **not** relicense it, and no modified copy of its code is distributed here.
+- **MaleficNet** and **Model X-Ray** papers are cited as references only; their PDFs are not redistributed.
 
-The historical repository snapshot (16 October 2026) had a top-level **MIT** `LICENSE` with a single named copyright holder. The project itself was carried out by **two contributors, Riccardo and Fabrizio**. Their contributions and any change to license/copyright metadata should be agreed between them; do not silently rewrite the historical license.
+## Data
 
-The upstream [`danigil/ModelXRay`](https://github.com/danigil/ModelXRay) explicitly declares **CC BY-NC-ND 4.0** and mentions a US provisional patent application. This is **not automatically compatible with treating all upstream source code as MIT**, particularly when making derivative copies. The repository's technical workflow uses a pinned upstream dependency; keep it referenced as upstream rather than silently vendoring modified code.
+| Object | Status |
+|---|---|
+| GHRP/STL10 model zoo ([Zenodo 6631784](https://zenodo.org/records/6631784)) | Not included. Obtain it from the original source; `scripts/download_d1_stl10.sh` automates this with checksum verification. |
+| `weights.npy` (1000 × 2864 float32) | Not included. Rebuilt with `scripts/extract_d1_real_weights.py`; SHA-256 in [`REPRODUCING.md`](../REPRODUCING.md). |
+| Synthetic payloads / embedded checkpoints | Not included. Generated on the fly; payloads are inert random bytes. |
+| Small summary CSVs, manifests, plots in `results/` | Included. Generated from our own runs; no third-party data. |
+| Full raw prediction CSVs | Kept locally, not published. |
 
-## Inventory and recommended handling
+All experiments use synthetic, non-executable payloads. No real malware was created, embedded or distributed.
 
-| Type | Recommendation | Action before public release |
-|---|---|---|
-| Original student experiment code | Keep in `scripts/` and `tests/`, subject to actual authorship agreement. | Determine applicable project code license/ownership. |
-| Model X-Ray third-party source | Keep upstream in `external/ModelXRay` as a genuine Git submodule (or documented external dependency), not as uncredited MIT source. | Confirm its exact license/version; avoid redistributing modified copies without authorization. |
-| GHRP/STL10 original checkpoint zoo, preprocessed dataset | Keep **outside** the public repository unless redistribution rights are explicitly confirmed. | Provide data source reference and SHA-256; keep local data. |
-| `weights.npy`, checkpoint `.pt`, payload `.bin`, downloaded model files | Usually keep **outside** Git (already in local `~/mlsec-local/`). | Check license and sizes; do not push into Git history. |
-| `docs/references/*.pdf` (third-party paper PDFs) | Prefer links and citations rather than distributing PDF copies. | Review each item's redistribution terms. If already in Git history, a regular removal does not erase history. |
-| Small analysis CSVs, manifests, generated plots | Usually suitable to publish when generated from your own runs and free of restrictive third-party data. | Confirm they do not contain bundled third-party data or personal identifiers. |
-| Internal planning docs, personal notes, credentials, private paths/logs | Do not include in the portfolio release by default. | Inspect content before any removal or publishing. |
+## Reproducibility notes
 
-## Recommended documentation
-
-- `docs/E1_REPRODUCIBILITY.md`: original experiment hashes and data provenance.
-- `REPRODUCING.md`: verify summaries without running experiments, and prerequisites for full training.
-- `docs/CONTRIBUTIONS.md`: two contributors and review of actual roles.
-- `docs/REPOSITORY_CLEANUP_PLAN.md`: nondestructive cleanup sequence.
-
-## Release gate
-
-Before making `main` a clean public portfolio page, verify all of the following:
-
-- Both contributors have reviewed credit and distribution terms for the code they wrote.
-- Third-party PDF redistribution is assessed and unnecessary PDF blobs removed from the visible tree if permission is unclear.
-- The exact provenance and copyright notices of the Model X-Ray submodule remain intact.
-- Dataset and model zoo redistribution rules are documented; no raw zoo/checkpoint blobs are committed inadvertently.
-- A fresh clone can at least verify published numeric summaries **without the raw dataset**.
-- Any Git history cleanup is a separate, planned operation requiring agreement from collaborators; ordinary `git rm` only removes from the latest tree.
+- Provenance and hashes: [`E1_REPRODUCIBILITY.md`](E1_REPRODUCIBILITY.md).
+- Verification of published numbers without data: [`REPRODUCING.md`](../REPRODUCING.md).

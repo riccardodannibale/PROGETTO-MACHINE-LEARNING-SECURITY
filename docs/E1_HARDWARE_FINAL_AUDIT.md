@@ -1,6 +1,6 @@
 # E1 — Appendice finale: integrità e analisi hardware (20/10/2026)
 
-**Stato: verifiche di integrità e confronto descrittivo completati.** Questo documento supporta `exam/E1_REPORT.md` e non sostituisce i CSV originali. I risultati Mac sono una replica su altro **ambiente di calcolo**, non su nuova architettura neurale.
+**Stato: verifiche di integrità e confronto descrittivo completati.** Questo documento supporta `report/PROJECT_REPORT.md` e non sostituisce i CSV originali. I risultati Mac sono una replica su altro **ambiente di calcolo**, non su nuova architettura neurale.
 
 ## Evidenze e livelli di verifica
 
@@ -46,4 +46,4 @@ Archiviare quindi `results/analysis/e1_hardware/` se si desiderano anche i dati 
 
 **E1 chiuso:** baseline in-distribution LSB su stesso zoo, test per identità disgiunte e replica Mac coerente. Rimangono fuori dall'evidenza: valutazione esterna, payload recovery, utility del modello dopo embedding, causalità dei tempi CPU, equivalenza bitwise dei training e validazione cross-architecture delle CNN. Il mini-benchmark CPU/RAM prospettico è **opzionale** e non blocca E2.
 
-**Artefatti:** `results/replicas/e1_mac_m4/audit/`, `results/figures/e1/E1_grafici.xlsx`, figure `e1_hw_*.png`, `exam/E1_REPORT.md`. Dataset e payload binari non sono distribuiti dentro Git.
+**Artefatti:** `results/replicas/e1_mac_m4/audit/`, `results/figures/e1/E1_grafici.xlsx`, figure `e1_hw_*.png`, `report/PROJECT_REPORT.md`. Dataset e payload binari non sono distribuiti dentro Git.

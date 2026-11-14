@@ -33,7 +33,7 @@
 - G3-1: script e self-test superati su Ubuntu e Mac; runner E2 SHA invariato.
 - G3-2: audit Ubuntu `E3 MATCHED/METADATA CONTROLS QA OK`, risultati locale **read-only**.
 - G3-3: audit Mac con stesso script e fonti raw, risultati locale **read-only**.
-- G3-4: confronto 60 righe per fit/metodo/condizione, evidenze in `results/e3_final/` **solo dopo i due audit**; aggiornare `exam/PROJECT_REPORT.md` e `.docx` con risultati reali e limiti; rigenerare grafici a partire dai CSV.
+- G3-4: confronto 60 righe per fit/metodo/condizione, evidenze in `results/e3_final/` **solo dopo i due audit**; aggiornare `report/PROJECT_REPORT.md` e `.docx` con risultati reali e limiti; rigenerare grafici a partire dai CSV.
 - G3-5: check struttura report contro roadmap A0–A6, revisione Fabrizio, presentazione, licenze e versione di consegna. Il suggerimento di 10–15 pagine della roadmap può richiedere una **versione sintetica** del report (la bozza E1+E2 attuale è più lunga).
 
 **STOP per test incompleto o sorgenti discordanti:** non cancellare output E2 originali, non alterare CSV/labels/thresholds per fare passare QA, non ripetere training selettivamente.

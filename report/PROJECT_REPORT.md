@@ -2,8 +2,8 @@
 
 **Esperimenti E1 + E2 + E3 | versione consolidata: 22 ottobre 2026**
 **Autori del lavoro sperimentale:** Riccardo e Fabrizio
-**Ambito:** progetto universitario per la sessione di dicembre 2026; percorso di tesi magistrale individuale (2027) distinto, eventuale paper successivo non incluso nella consegna.
-**Repository di lavoro:** `PROGETTO-MACHINE-LEARNING-SECURITY`, branch `ricky`; E2 archiviato nel commit `ee2dd82`, codice E3 nel commit `e82a4d8`. Risultati E3 incrociati auditati sulle due piattaforme e documentati nella Parte III.
+**Ambito:** progetto universitario di Machine Learning Security (dicembre 2026).
+**Repository:** `PROGETTO-MACHINE-LEARNING-SECURITY`. Risultati E3 incrociati e auditati sulle due piattaforme (Parte III).
 
 > **Risultato essenziale.** Sullo zoo GHRP/STL10 di 1.000 CNN autentiche, un detector Siamese Model X-Ray addestrato su soli **tre checkpoint benigni e tre derivati X-LSB X=23** rileva l'attacco noto in test con **AUROC centroid media 0,9043** in entrambe le piattaforme. Quando lo *stesso detector per fit*, senza riaddestramento e senza nuova calibrazione, incontra un embedding **spread-spectrum sintetico a 16 bit** non visto in training, l'AUROC scende a **0,4776 Ubuntu** e **0,4745 Mac M4** per α=0,24. **ΔAUROC OOD−ID = −0,4267 Ubuntu, −0,4298 Mac.** Le due tecniche non sono matched per norma relativa o capacità: il risultato misura questo shift sperimentale, non una proprietà universale di MaleficNet o della steganografia.
 
@@ -18,8 +18,6 @@
 ### Guida alla lettura e stato delle fonti
 
 Il presente documento **prosegue il report E1 esistente**. La **Parte I** ne preserva la metodologia, i valori e il percorso sperimentale, aggiornando soltanto i riferimenti temporali a E2 dove sono diventati superati. La **Parte II** aggiunge l'intero esperimento E2: motivazione, differenze fra famiglie di embedding, implementazione concreta, gate G1–G7, audit, risultati, limiti e riferimenti. La **Parte III** descrive E3, audit retrospettivo delle coppie e dei metadati sugli score E2, con verifica incrociata Ubuntu/Mac e senza nuovo training. I tre esperimenti sono **un lavoro di corso**, non un articolo scientifico già pubblicato dagli studenti.
-
-La base E1 impiegata è la copia completa disponibile del documento `exam/E1_REPORT.md`/`.docx`, con audit hardware Ubuntu/Mac. **Non è stato possibile leggere direttamente la versione più recente di `exam/` dal server GitHub** durante la composizione; per questo il nuovo report viene consegnato come `exam/PROJECT_REPORT.md` e `exam/PROJECT_REPORT.docx`, **senza sostituire o cancellare** `exam/E1_REPORT.*`. Prima del commit è opportuno confrontare la Parte I con l'E1 locale della branch `ricky`.
 
 ---
 
@@ -839,7 +837,6 @@ Per uno studio di tesi successivo si possono preregistrare su **nuovi checkpoint
 
 La formula sintetica del progetto è: **E1** mostra che Model X-Ray può separare una classe di embedding X-LSB aggressivo su checkpoint indipendenti dal training; **E2** rivela che tale risultato non si trasferisce automaticamente allo spread-spectrum sintetico non visto; **E3** esclude, per il test svolto, alcune spiegazioni spurie banali legate all'identità, al trattamento dei benigni e alla soglia. Il quadro è replicato su due hardware, ma non dimostra invisibilità universale o causalità della sola famiglia. Non abbiamo usato malware operativo né riaddestrato il detector dopo aver visto i risultati OOD.
 
-**Stato del lavoro sperimentale d'esame:** E1, E2 ed E3 completati secondo i rispettivi controlli documentati. La **consegna universitaria** richiede ancora la revisione editoriale di entrambi, l'eventuale relazione sintetica nella lunghezza richiesta dai docenti, la presentazione, un audit di licenze/dati distribuibili e la verifica dello scope col docente. Non si dichiara approvazione docente o valutazione finale non documentata. La tesi individuale 2027 e l'eventuale paper sono percorsi successivi e separati.
 
 ---
 
@@ -854,7 +851,6 @@ La formula sintetica del progetto è: **E1** mostra che Model X-Ray può separar
 
 **Artifact primari interni (E1–E3):**
 
-- `exam/E1_REPORT.md` e `exam/E1_REPORT.docx`: storia E1 conservata come documento sperimentale autonomo.
 - `docs/E2_PROTOCOL_FROZEN.md`: condizioni e stop rule del protocollo E2.
 - `scripts/e2_synthetic_spread.py`: implementazione didattica *SPREAD_v0*, non MaleficNet.
 - `scripts/run_e2_paired_v0.py`: training e valutazione paired sotto protocollo bloccato.
@@ -864,6 +860,3 @@ La formula sintetica del progetto è: **E1** mostra che Model X-Ray può separar
 - `docs/E2_G7_FINAL_RESULTS.md`, `results/e2_final/`: riepiloghi, grafici, CSV Mac e risultati Ubuntu consolidati.
 - `docs/E3_PROTOCOL_CONTROLS.md`, `scripts/e3_matched_controls.py`, `scripts/e3_compare_controls.py` e `tests/test_e3_controls.py`: protocollo e software E3, commit `e82a4d8`.
 - `~/mlsec-local/runs/e3_cross_platform_v1/`: originale confronto E3 generato sui CSV per fit delle due macchine; `results/e3_final/`: copia per il repository dei riepiloghi consegnabili.
-
-**Provenienza del presente rapporto integrato.** La Parte I conserva il contenuto sostanziale dell'E1 già documentato (con aggiornamento dei riferimenti temporali a E2). La Parte II descrive gli esperimenti E2 conclusi il 22 ottobre 2026 a partire dai sorgenti versionati, dai log delle due piattaforme, dai CSV di sintesi e dall'archivio finale `ee2dd82`. La Parte III utilizza esclusivamente i risultati E3 forniti nei log Ubuntu e nel rapporto `E3_CROSS_PLATFORM_REPORT.md` ottenuto dal confronto dei CSV originali Mac/Ubuntu; nella presente confezione non sono disponibili i 120 record per-fit originali delle due piattaforme. Le statistiche E3 sono quindi trascritte dai riepiloghi del confronto già auditato, non ricalcolate qui dai predittori grezzi. Non costituisce una nuova esecuzione sperimentale. L'accesso diretto alla versione remota corrente di `exam/E1_REPORT.md` non è stato disponibile durante la preparazione di questo aggiornamento; per evitare sostituzioni involontarie, l'originale E1 nella repository resta intatto e la relazione integrata è fornita come nuovo documento `exam/PROJECT_REPORT.*`.
-

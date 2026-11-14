@@ -100,7 +100,6 @@ Il comando legge i **CSV versionati** già prodotti e rigenera quattro PNG in `r
 
 - GitHub upstream: https://github.com/danigil/ModelXRay
 - Dataset zoo GHRP STL10: https://zenodo.org/records/6631784
-- Roadmap originale del progetto d'esame, file del gruppo: `Roadmap_Progetto_Tesi_Paper_IEEE_con_Letture(7).docx`.
 
 
 ## Replica indipendente di Fabrizio su Mac M4 (20 ottobre 2026)
