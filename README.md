@@ -52,5 +52,5 @@ These checks verify the published aggregate summaries, essential repository path
 
 ## Authors and license
 
-**Authors:** Riccardo D’Annibale and Fabrizio Mazzilli.  
+**Authors:** Riccardo D’Annibale and Fabrizio Giuseppe Mazzilli.  
 The project’s own code is distributed under the MIT License in [LICENSE](LICENSE). Model X-Ray and third-party data remain subject to their own terms.
