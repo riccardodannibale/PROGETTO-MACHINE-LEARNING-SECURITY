@@ -17,8 +17,6 @@ git clone --recurse-submodules \
 cd PROGETTO-MACHINE-LEARNING-SECURITY
 ```
 
-The repository is private. GitHub access is required.
-
 ## 2. Install system dependencies
 
 ```bash
@@ -57,9 +55,8 @@ The original Model X-Ray code is available in:
 
 `external/ModelXRay/`
 
-Project-specific code belongs in:
+Project-specific code is in:
 
-- `src/`
 - `scripts/`
 - `configs/`
 - `tests/`

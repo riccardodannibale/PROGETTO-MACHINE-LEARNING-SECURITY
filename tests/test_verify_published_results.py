@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Synthetic smoke test for the portfolio-only CSV consistency checker.
+"""Synthetic smoke test for the published-results CSV consistency checker.
 
 Tests the small, standalone checker; does not train or inspect any model weights.
 """
@@ -82,7 +82,7 @@ def main():
         write(root/'results/e2_final/ubuntu/summary.csv', rows)
         proc = subprocess.run([sys.executable, str(CHECKER), '--root', str(root)], capture_output=True, text=True)
         assert proc.returncode != 0, 'corrupted AUROC should fail'
-        print('PORTFOLIO VERIFIER SELF-TEST OK: valid summaries accepted, corrupted summary rejected')
+        print('PUBLISHED-RESULTS VERIFIER SELF-TEST OK: valid summaries accepted, corrupted summary rejected')
 
 if __name__ == '__main__':
     main()

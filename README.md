@@ -19,9 +19,9 @@ Our objective is **evaluation**, not to build or execute malware. All payloads a
 
 | Experiment | Design | Key result | Evidence |
 |---|---|---|---|
-| **E1 — ID replication** | Siamese trained/tested on X-LSB, disjoint source checkpoints; X ∈ {1, 8, 16, 23}. | For **X=23**, centroid test AUROC: **0.901863 Ubuntu**, **0.904378 Mac M4**. | [E1 report](exam/E1_REPORT.md) · [E1 reproducibility](docs/E1_REPRODUCIBILITY.md) |
+| **E1 — ID replication** | Siamese trained/tested on X-LSB, disjoint source checkpoints; X ∈ {1, 8, 16, 23}. | For **X=23**, centroid test AUROC: **0.901863 Ubuntu**, **0.904378 Mac M4**. | [E1 report](report/PROJECT_REPORT.md) · [E1 reproducibility](docs/E1_REPRODUCIBILITY.md) |
 | **E2 — unseen embedding family** | Train/calibrate using **X-LSB X=23**; evaluate the *same detector per fit* on ID X-LSB versus OOD synthetic spread-spectrum α ∈ {0.24, 0.16}. | At **α=0.24**, centroid test AUROC: **0.477620 Ubuntu**, **0.474500 Mac**; paired ΔAUROC (OOD−ID): **−0.426653 / −0.429800**. | [E2 report](docs/E2_G7_FINAL_RESULTS.md) · [E2 results](results/e2_final/) |
-| **E3 — retrospective controls** | Verify 1:1 benign/stego checkpoint pairing, balance of recorded identities, unchanged benign scores/FPR, and TPR/FNR across families. | At α=0.24, centroid **TPR 0.1815 Ubuntu / 0.1785 Mac** at frozen thresholds; benign FPR unchanged across conditions on each platform. | [E3 report](exam/E3_REPORT.md) · [E3 results](results/e3_final/) |
+| **E3 — retrospective controls** | Verify 1:1 benign/stego checkpoint pairing, balance of recorded identities, unchanged benign scores/FPR, and TPR/FNR across families. | At α=0.24, centroid **TPR 0.1815 Ubuntu / 0.1785 Mac** at frozen thresholds; benign FPR unchanged across conditions on each platform. | [E3 report](report/PROJECT_REPORT.md) · [E3 results](results/e3_final/) |
 
 All AUROC entries above are **means over 10 fits per platform**, not estimates from 10 independent test datasets. Both platforms reuse the same **200 distinct test checkpoint identities**; the repetition axis changes fit seeds/few-shot training.
 
@@ -44,32 +44,25 @@ All AUROC entries above are **means over 10 fits per platform**, not estimates f
 - **No bitwise TF reproducibility guarantee:** Ubuntu/Mac results agree closely numerically, not necessarily bit for bit.
 - **Published summaries are not the complete raw archive:** full prediction CSVs and model-zoo checkpoint files are retained locally, subject to dataset licensing and permissions.
 
-For a detailed discussion, see the [integrated technical report](exam/PROJECT_REPORT.md).
+For a detailed discussion, see the [integrated technical report](report/PROJECT_REPORT.md).
 
 ## Repository map
 
 ```text
 .
-├── README.md                        # Project overview and results
-├── REPRODUCING.md                   # How to inspect / reproduce experiments
-├── external/ModelXRay/              # Upstream Git submodule; its own terms apply
-├── manifests/e1_uniform_v1/         # Frozen checkpoint split and protocol
-├── scripts/                         # Provenance, original runners and E2/E3 audit tools
-├── tests/                           # Integrity / regression checks
-├── configs/                         # Environment snapshots where available
-├── results/
-│   ├── figures/e1/                 # E1 figures
-│   ├── e2_final/                   # E2 tables, Mac replica, figures
-│   └── e3_final/                   # E3 controls, platform summaries, figure
-├── docs/                            # Method, frozen protocols, audit notes, licensing
-└── exam/
-    ├── PROJECT_REPORT.md           # Full E1+E2+E3 technical report
-    ├── PROJECT_REPORT.docx         # Editable report
-    ├── E1_REPORT.md                # Preserved historical E1 report
-    └── E3_REPORT.md                # Independent E3 write-up
+├── README.md                # Project overview and results
+├── REPRODUCING.md           # How to verify / reproduce the experiments
+├── report/                  # Full E1+E2+E3 technical report (md, docx, pdf)
+├── results/                 # Published tables and figures (E1, E2, E3)
+├── manifests/               # Frozen checkpoint splits and protocol
+├── scripts/                 # Experiment runners, audits, plots
+├── tests/                   # Integrity / regression checks
+├── docs/                    # Protocols, audits, setup, licensing notes
+├── configs/                 # Environment snapshot
+└── external/ModelXRay/      # Upstream Git submodule; its own terms apply
 ```
 
-The E1–E3 experiments are preserved in the project's Git history. The `main` branch is the intended public entry point; the original experimental development remains traceable through the historical commits and the `experiments-e1-e2-e3-v1` tag. See [cleanup and release plan](docs/REPOSITORY_CLEANUP_PLAN.md).
+The original development history is preserved in the `ricky` and `fabry` branches and in the `experiments-e1-e2-e3-v1` tag. The E1/E2 launch scripts check that they run on branch `ricky`, so a full re-execution must be done from there (see [REPRODUCING.md](REPRODUCING.md)).
 
 ## Reproducing and verifying results
 
@@ -79,13 +72,7 @@ The E1–E3 experiments are preserved in the project's Git history. The `main` b
 python3 scripts/verify_published_results.py
 ```
 
-This cross-checks E2 paired AUROC rows against the published summaries and E3 summary structure / cross-family FPR controls; it **does not recompute AUROC from raw predictions**. Its existence after applying the accompanying portfolio package is a convenience layer on top of the frozen audits.
-
-**Read-only repository inventory:**
-
-```bash
-python3 scripts/audit_repository.py
-```
+This cross-checks E2 paired AUROC rows against the published summaries and E3 summary structure / cross-family FPR controls; it **does not recompute AUROC from raw predictions**.
 
 **Full experimental replication** requires the original checkpoint zoo, fixed environment, [upstream Model X-Ray](https://github.com/danigil/ModelXRay) at pinned commit, dataset hashes and the full E1/E2 runner commands. Start with **[REPRODUCING.md](REPRODUCING.md)** rather than running test-phase scripts blindly. **E2 test execution is approval-gated and should not be re-run to select favorable outcomes.**
 
@@ -102,17 +89,15 @@ The zoo is described in the [dataset/provenance notes](docs/E1_REPRODUCIBILITY.m
 
 ## Reports and figures
 
-- [Integrated report (Markdown)](exam/PROJECT_REPORT.md) · [Editable Word report](exam/PROJECT_REPORT.docx)
+- [Integrated report (Markdown)](report/PROJECT_REPORT.md) · [Word](report/PROJECT_REPORT.docx) · [PDF](report/PROJECT_REPORT.pdf)
 - [E1 figures](results/figures/e1/) · [E2 figures](results/e2_final/plots/) · [E3 figure](results/e3_final/plots/)
 - [E2 cross-platform statistics](results/e2_final/e2_cross_platform_statistics.csv) · [E3 cross-platform summary](results/e3_final/cross_platform/e3_cross_platform_summary.csv)
-- [Interpretation and data reuse restrictions](docs/THIRD_PARTY_AND_DATA.md)
+- [Third-party content and data policy](docs/THIRD_PARTY_AND_DATA.md)
 
 ## Provenance, credit and licensing
 
-**Project contributions:** Riccardo and Fabrizio jointly carried out the E1–E3 student project. See [CONTRIBUTIONS.md](docs/CONTRIBUTIONS.md) for a fact-checked attribution worksheet; final authorship details should be approved by both contributors.
+**Authors:** Riccardo and Fabrizio, jointly. Riccardo ran and audited the Ubuntu x86_64 experiments and coordinated the repository and the report; Fabrizio reviewed the E2 protocol and runner and independently ran and reproduced E1–E3 on Apple M4 (ARM64). Experimental design, interpretation and report were joint work.
 
-**Third-party work:** the upstream **Model X-Ray** repository states **CC BY-NC-ND 4.0** terms and mentions patent-related restrictions; the project's **MIT** license must **not** be interpreted as relicensing the upstream code, datasets, checkpoint files, or third-party paper PDFs. Review [THIRD_PARTY_AND_DATA.md](docs/THIRD_PARTY_AND_DATA.md) before redistributing or re-packaging. This README does not grant additional rights.
+**Third-party work:** the upstream **Model X-Ray** repository states **CC BY-NC-ND 4.0** terms and mentions patent-related restrictions; the project's **MIT** license must **not** be interpreted as relicensing the upstream code, datasets, checkpoint files, or third-party paper PDFs. See [THIRD_PARTY_AND_DATA.md](docs/THIRD_PARTY_AND_DATA.md) before redistributing. This README does not grant additional rights.
 
 **References.** [Model X-Ray (paper / repository)](https://github.com/danigil/ModelXRay) · [MaleficNet (ESORICS 2022, background only)](https://doi.org/10.1007/978-3-031-17143-7_21) · [GHRP/STL10 model zoo](https://zenodo.org/records/6631784).
-
-**Scope boundary:** E1–E3 comprise the collaborative **December 2026 course project**. Any future individual 2027 thesis, additional controls, and possible journal/conference paper are **separate future work**, not outputs of this repository.

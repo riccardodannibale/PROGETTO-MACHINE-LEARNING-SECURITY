@@ -4,7 +4,7 @@ This guide deliberately separates **verification of published numbers** from **r
 
 ## Level 0 — Verify published outputs without the dataset
 
-From the project root (on `ricky` or the release branch containing E1–E3):
+From the project root:
 
 ```bash
 python3 scripts/verify_published_results.py
@@ -51,6 +51,8 @@ On the Mac M4, use its actual Python path, local E2 test directory, and `--platf
 
 ## Level 2 — Full experiment recreation (requires data, time and permission)
 
+> **Branch note.** The E1 test-matrix, E2 and E3 launch scripts verify that they run on git branch `ricky`, and the E2 runner checks `docs/E2_PROTOCOL_FROZEN.md` against `HEAD`. These checks are part of the frozen protocol and were left unchanged. To re-execute, check out `ricky` (or the `experiments-e1-e2-e3-v1` tag) instead of `main`. `main` contains the same code, plus results and the final report.
+
 Use the **recorded, pinned environment**, not a guessed modern `pip install` sequence. Historically, Ubuntu used Python 3.11 in `~/mlsec-local/venvs/modelxray/`; the Mac used a separately validated Apple M4 environment. The E1 documentation lists the Ubuntu dependency lock file under `configs/`.
 
 The sources require:
@@ -94,4 +96,4 @@ Python/NumPy seeds, source manifests and payload generation are controlled. Howe
 - Model pairs share a source identity. The 10 fit repetitions share the same 200 test checkpoint identities. Compute uncertainty with this correlation structure in mind; do not treat 2,000 repeated identities as independent test models.
 - E3 is a **retrospective matched-control analysis** of E2 test scores, not a fresh blind holdout.
 
-See [`docs/THIRD_PARTY_AND_DATA.md`](docs/THIRD_PARTY_AND_DATA.md) and [`docs/REPOSITORY_CLEANUP_PLAN.md`](docs/REPOSITORY_CLEANUP_PLAN.md).
+See [`docs/THIRD_PARTY_AND_DATA.md`](docs/THIRD_PARTY_AND_DATA.md).
