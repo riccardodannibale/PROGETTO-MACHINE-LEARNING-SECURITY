@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -20,3 +22,5 @@ jobs:
         run: python tests/test_verify_published_results.py
       - name: Test E2 release guard contract
         run: python tests/test_e2_g7_release_contract.py
+      - name: Check repository paths and Markdown links
+        run: python tests/test_repository_layout.py

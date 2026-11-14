@@ -17,13 +17,15 @@ These results apply to the tested detector, checkpoint collection and embedding 
 
 ## Final report
 
+- [Final report (PDF)](report/final_report.pdf)
+- [Final report (Word)](report/final_report.docx)
 - [Final report (Markdown)](report/final_report.md)
 
 ## Repository map
 
 | Path | Contents |
 |---|---|
-| `report/` | Final project report. |
+| `report/` | Final report in PDF, DOCX and Markdown. |
 | `scripts/` | Experiment runners, audit tools, plotting and published-result verification. |
 | `tests/` | Unit and regression tests. |
 | `results/` | Published CSV summaries, figures, platform comparisons and audit records. |
@@ -41,9 +43,10 @@ The experiment code uses scripts rather than notebooks. The original checkpoint 
 git clone --recurse-submodules https://github.com/riccardodannibale/PROGETTO-MACHINE-LEARNING-SECURITY.git
 cd PROGETTO-MACHINE-LEARNING-SECURITY
 python3 scripts/verify_published_results.py
+python3 tests/test_repository_layout.py
 ```
 
-A successful run prints `PUBLISHED E2/E3 SUMMARY QA OK`. This check verifies published summary CSV consistency; it does not retrain the detector or rebuild AUROC from raw predictions. See [REPRODUCING.md](REPRODUCING.md) for details.
+A successful result check prints `PUBLISHED E2/E3 SUMMARY QA OK`. The layout test checks internal Markdown links and required experiment records. These checks do not retrain the detector or rebuild AUROC from raw predictions. See [REPRODUCING.md](REPRODUCING.md) for details.
 
 ## Authors and license
 

@@ -9,6 +9,7 @@ From the repository root, run:
 ```bash
 python3 scripts/verify_published_results.py
 python3 tests/test_verify_published_results.py
+python3 tests/test_repository_layout.py
 ```
 
 The verifier uses only the Python standard library. It checks the published E2 paired AUROC tables, summary CSVs, cross-platform statistics and E3 aggregate controls. A successful run prints `PUBLISHED E2/E3 SUMMARY QA OK`.
@@ -97,4 +98,4 @@ Do not bypass a failed integrity check, edit a frozen protocol to make a runner 
 - E3 is retrospective and reuses E2 test scores. It is not an independent blind holdout.
 - The public repository contains published summaries and audit records, but not every raw prediction or original checkpoint.
 
-For the scientific scope and limitations, see [report/final_report.pdf](report/final_report.pdf) and [docs/results_and_limitations.md](docs/results_and_limitations.md).
+For the scientific scope and limitations, see the [final report](report/final_report.md) and [results and limitations](docs/results_and_limitations.md).

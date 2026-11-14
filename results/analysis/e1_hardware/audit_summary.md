@@ -1,29 +1,30 @@
-# E1 — Audit descrittivo Ubuntu vs Mac M4
+# E1 platform comparison audit
 
-Generato (UTC): 2026-10-20T12:30:47Z
+Generated: 2026-10-20 (UTC).
 
-## Input (integrità)
-- Ubuntu: `/home/admin1/PROGETTO-MACHINE-LEARNING-SECURITY/results/test/e1_uniform_v2/metrics_per_run.csv` — SHA-256 `e8bb51a024a9e5f033c35088b980ab46458c5cd329de64770a989f5c976970ef`
-- Mac: `/home/admin1/PROGETTO-MACHINE-LEARNING-SECURITY/results/replicas/e1_mac_m4/metrics_per_run.csv` — SHA-256 `f8783ad49489396a3ee3c5f34a47c291ddc97aed0da2b693008240cb15d7f84f`
+## Inputs
+- Ubuntu test metrics: `results/test/e1_uniform_v2/metrics_per_run.csv`.
+- Mac M4 test metrics: `results/replicas/e1_mac_m4/metrics_per_run.csv`.
+- Source-file hashes are recorded in the replication manifest and audit artifacts.
 
-## Controlli
-- 320 metriche/stage per piattaforma? **320 metriche totali**, 160 validation + 160 test per piattaforma (40 fit distinti).
-- I fit sono abbinabili per X, repeat e fit_seed, subordinatamente all’audit del codice e degli ID di training.
-- Soglie applicate al test uguali a quelle della validation dello stesso fit.
-- I tempi sono deduplicati per (repeat,X); non 320 durate.
+## Checks
+- 320 metric records per platform: 160 validation and 160 test, covering 40 unique fits.
+- Fits can be paired by X, repeat and fit seed, subject to source-code and training-identity audit.
+- Test thresholds match the validation threshold from the same fit.
+- Runtime values are deduplicated by (repeat, X); they are not 320 separate durations.
 
-## Risultati descrittivi
-- X=23 AUROC centroid: Ubuntu 0.901863; Mac 0.904377; differenza media abbinata (Mac−Ubuntu) +0.002515.
-- `elapsed_sec` test, 40 fit: Ubuntu media 217.124s; Mac media 104.412s.
-- Rapporto delle **medie del tratto cronometrato** Ubuntu/Mac: 2.079.
+## Descriptive results
+- X=23 centroid AUROC: Ubuntu 0.901863; Mac 0.904378; mean difference (Mac - Ubuntu) +0.002515.
+- Mean timed test section across 40 fits: Ubuntu 217.124 s; Mac 104.412 s.
+- Ratio of the timed-section means (Ubuntu / Mac): 2.079.
 
-## Limiti di interpretazione
-- Non test di equivalenza, non CI inferenziale e non misura causale della CPU.
-- `elapsed_sec` inizia DOPO la costruzione delle immagini train/validation e NON include l’avvio Python o la scrittura dei CSV.
-- Ubuntu è in una VM: OS, virtualizzazione, CPU, build TensorFlow e RAM sono fattori concomitanti.
-- Nessun training eseguito; nessun valore dei CSV originali modificato.
+## Interpretation limits
+- This is not an equivalence test, inferential confidence interval or causal CPU benchmark.
+- `elapsed_sec` starts after train/validation image construction and excludes Python startup and CSV writing.
+- Ubuntu ran in a virtual machine; operating system, virtualization, CPU, TensorFlow build and memory are confounded.
+- No model training was performed during this audit and no original CSV values were changed.
 
-## Tabelle generate
-- `paired_per_run.csv`: 40 coppie X/repeat e delta Mac−Ubuntu.
-- `metrics_by_x.csv`: differenze e variabilità per X e metrica.
-- `timing_by_x.csv`: tempi descrittivi per X e piattaforma.
+## Supporting tables
+- `paired_per_run.csv`: 40 X/repeat pairs and Mac-minus-Ubuntu differences.
+- `metrics_by_x.csv`: differences and variation by X and metric.
+- `timing_by_x.csv`: descriptive timing by X and platform.
