@@ -7,6 +7,12 @@ Machine Learning Security project by Riccardo D'Annibale and Fabrizio Giuseppe M
 
 This project evaluates a few-shot detector inspired by Model X-Ray on X-LSB weight modifications and tests transfer to a project-specific synthetic spread-spectrum encoder. The experimental protocol uses source-checkpoint-disjoint train/validation/test splits, paired ID/OOD conditions and retrospective matched controls.
 
+## Scope of this delivery
+
+This delivery closes **Phase 1 (E1–E3)**: the X-LSB baseline, the project-specific synthetic spread-spectrum OOD experiment, and the retrospective matched controls. **Phase 2 (noisy-channel robustness and remediation) is future work and is not reported as completed.**
+
+The report includes the project workflow and a corrected system architecture separating the host CNN checkpoints, payload embedding in their weights, and the Model X-Ray detector.
+
 ## Main results
 
 ### E1 - X-LSB baseline

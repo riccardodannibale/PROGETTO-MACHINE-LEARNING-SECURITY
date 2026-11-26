@@ -4,7 +4,7 @@
 
 **Progetto di Machine Learning Security**  
 **Autori:** Riccardo D'Annibale e Fabrizio Giuseppe Mazzilli  
-**Data:** 14 novembre 2026
+**Data:** 26 novembre 2026
 
 # Come leggere questa relazione
 
@@ -13,6 +13,12 @@
 Questa relazione descrive il contesto scientifico, il disegno sperimentale, i risultati, i limiti e le procedure necessarie per consultare o riprodurre il lavoro. La parte principale è dedicata a metodo e risultati; le informazioni operative e amministrative sono raccolte nelle appendici.
 
 La repository contiene anche alcuni **documenti di protocollo storici e immutabili** relativi all'esperimento E2. Non sono manuali aggiuntivi: sono registri di integrità e autorizzazione che il codice sperimentale controlla tramite hash e percorso. Per questo motivo vengono conservati separatamente e non riscritti dentro questa relazione.
+
+## Workflow generale e perimetro della relazione
+
+La figura distingue il lavoro completato (FASE 1: E1, E2 ed E3) dalla FASE 2, che rappresenta un'estensione pianificata e non ancora implementata. Questa relazione e i risultati pubblicati documentano esclusivamente la FASE 1.
+
+![Workflow generale di Beyond the X-Ray: FASE 1 completata e FASE 2 come lavoro futuro](figures/workflow_phase1.svg)
 
 # 1. Panoramica in parole semplici
 
@@ -105,7 +111,21 @@ Il punteggio principale è basato sulla distanza dai centroidi:
 
 Il punteggio è definito come `distanza_benigno - distanza_stego`: un valore maggiore favorisce la classe modificata. Come metodo secondario viene usato **1-NN** (*one-nearest-neighbour*), che confronta il campione con il singolo esempio di training più vicino.
 
-## 2.6 Relazione con il paper Model X-Ray e perimetro della replica
+## 2.6 Architettura del sistema: host model, embedding e detector
+
+Il progetto coinvolge componenti distinte, che è importante non confondere:
+
+- **Host model / source model:** una delle piccole CNN pre-addestrate del model zoo GHRP/STL10. È il modello i cui pesi vengono modificati.
+- **Steganographic embedding:** applica il payload sintetico al vettore dei pesi del checkpoint. Il payload non viene inserito negli input della CNN e non viene scritto nei pesi del detector.
+- **Weight representation:** i pesi benigni e quelli modificati sono convertiti attraverso la pipeline di rappresentazione di Model X-Ray in immagini GF di dimensione 100 × 100.
+- **Detector:** Model X-Ray usa la rete Siamese few-shot per confrontare le rappresentazioni e assegnare uno score benign/stego.
+- **Decoder:** è una componente distinta dal detector. Nel caso di SPREAD_v0 recupera i bit usando la chiave e l'identificativo del checkpoint.
+
+Il termine *generative model* non è appropriato per i modelli host usati in questo esperimento: la collezione è composta da checkpoint di CNN pre-addestrate, non da GAN, VAE o diffusion model.
+
+![Architettura corretta: il payload viene inserito nei pesi della CNN host e Model X-Ray analizza la rappresentazione dei pesi](figures/architecture_host_detector.svg)
+
+## 2.7 Relazione con il paper Model X-Ray e perimetro della replica
 
 Il paper Model X-Ray pubblicato nel 2026 descrive la rappresentazione Grayscale-Fourpart (GF), una rete few-shot e una valutazione che include attacchi X-LSB e trasferimento OOD verso MaleficNet. Il repository upstream contiene inoltre una matrice di baseline e altre pipeline di valutazione. Il presente progetto riutilizza componenti upstream del detector Siamese e della pipeline X-LSB, ma adotta un protocollo sperimentale adattato: split congelato per identità sorgente, dieci fit, tre identità di training per fit, payload sintetici deterministici e metriche/controlli aggiuntivi. Il runner E1 stesso dichiara che non si tratta di una riproduzione bit-per-bit dello split 3+3 del paper.
 
@@ -113,7 +133,7 @@ Il paper Model X-Ray pubblicato nel 2026 descrive la rappresentazione Grayscale-
 
 Anche il confronto OOD è diverso. Il paper valuta il trasferimento verso MaleficNet; E2 valuta `e2-keyed-orthogonal-spread-v0-educational`, un encoder sviluppato per questo progetto e ispirato allo spread-spectrum, ma privo della pipeline originale MaleficNet. Il risultato E2 non contraddice quindi il trasferimento OOD riportato dal paper: riguarda un encoder, una capacità di payload, un'intensità e un protocollo differenti. La formulazione corretta è che il detector non trasferisce il ranking alla specifica variante didattica qui testata.
 
-## 2.7 Metriche: come leggere i numeri
+## 2.8 Metriche: come leggere i numeri
 
 | Metrica | Significato pratico |
 |---|---|
@@ -367,6 +387,16 @@ La conclusione sostenibile è: **per la collezione GHRP/STL10, il rilevatore Sia
 Il progetto fornisce una valutazione controllata di un rilevatore few-shot per modifiche steganografiche dei pesi di reti neurali. E1 mostra che il detector riconosce la condizione X-LSB X=23 nella collezione studiata, ma non le intensità X=1, 8 e 16. E2 mostra che la capacità ID non si trasferisce alla specifica tecnica spread-spectrum sintetica implementata per il progetto: le AUROC OOD sono al livello del caso entro la variabilità osservata. E3 documenta una forte perdita di TPR sui campioni modificati, mentre la FPR invariata è un controllo strutturale atteso perché i punteggi benigni e la soglia restano invariati.
 
 Il lavoro combina un encoder keyed a codici ortogonali sviluppato per questo studio con un protocollo paired ID/OOD e controlli retrospettivi. Il metodo è un prototipo didattico: non è una nuova implementazione di MaleficNet e non permette di concludere che il detector sia superiore o inferiore al paper. Le estensioni scientifiche più rilevanti sono il matching della norma L2 e della capacità del payload, il confronto con la pipeline MaleficNet originale, l'uso di più architetture e collezioni indipendenti, un holdout esterno e una valutazione di utilità su più task.
+
+## Stato conclusivo della FASE 1
+
+La FASE 1 è composta da tre esperimenti conclusi:
+
+1. **E1 — Baseline X-LSB:** replica controllata del detector Model X-Ray sul protocollo adottato.
+2. **E2 — Generalizzazione OOD:** valutazione dello stesso detector su SPREAD_v0, mai presentato durante il training.
+3. **E3 — Experimental controls:** controlli retrospettivi sui risultati E2, senza nuovo training e senza un nuovo test set indipendente.
+
+I risultati, le figure e le limitazioni di questi tre esperimenti costituiscono la consegna scientifica documentata in questa relazione. La FASE 2 — nuova tecnica a microperturbazioni, noisy channel e remediation tramite noise-aware training — è indicata come possibile prosecuzione, ma **non è stata eseguita e non deve essere presentata come risultato ottenuto**.
 
 # Riferimenti
 
