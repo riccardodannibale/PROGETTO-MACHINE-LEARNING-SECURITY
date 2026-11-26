@@ -75,6 +75,15 @@ python3 tests/test_e2_g7_release_contract.py
 
 These checks validate the published aggregate summaries, repository layout and E2 integrity gates. They do not retrain the detector or recreate the full predictions. There is no active GitHub Actions workflow on `main`; run the checks manually.
 
+## Branch policy
+
+- **main** is the clean submission branch and the only branch needed to read the project and its final report.
+- **ricky** is retained as the frozen experiment-execution branch: E1/E2 wrappers explicitly check out or require this branch name and its recorded commit.
+- **chore/final-touches** and **submission-cleanup** are superseded historical branches; their final work is already incorporated into `main`.
+- **fabry** contains an earlier two-repeat E1 pilot and exploratory files that are not used in the final E1–E3 results or report. It is not required for the submission.
+
+The obsolete working branches may be deleted after any local copies that the authors still need have been archived. Do not delete `ricky` while the frozen E1/E2 runner guards still require it.
+
 ## Reproduction data and integrity
 
 The original checkpoint collection and `weights.npy` are not stored in the repository. The expected matrix has shape 1000 × 2864, dtype `float32` and size about 10.92 MiB. Source data: [Zenodo record 6631784](https://zenodo.org/records/6631784).
